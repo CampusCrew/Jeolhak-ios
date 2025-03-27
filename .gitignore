@@ -31,3 +31,6 @@ build/
 # User-specific files
 *.swp
 *.swo
+
+# info
+jeolhak/Info.plist
