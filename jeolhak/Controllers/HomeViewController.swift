@@ -14,8 +14,13 @@ class HomeViewController: UIViewController {
     private var bottomInfoView: UIView!
     private var bottomInfoViewTopConstraint: NSLayoutConstraint!
     
-    private let collapsedHeight: CGFloat = 100
-    private let expandedHeight: CGFloat = 350
+    // 검색창 View
+    private var backgroundView: UIView! // 카드뷰 완전 팝업 시 블랙처리를 위한 View
+    private var searchBarContainer: UIView!
+    
+    // 카드 뷰 최소 높이
+    private let collapsedHeight: CGFloat = 120
+    private var expandedTopConstant: CGFloat = 100
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -58,6 +63,7 @@ class HomeViewController: UIViewController {
         // 배경 컨테이너
         let searchBarContainer = createSearchBarContainer()
         searchBarContainer.translatesAutoresizingMaskIntoConstraints = false
+        self.searchBarContainer = searchBarContainer
         view.addSubview(searchBarContainer)
         
         // 검색창 배경 Auty Layout
@@ -170,12 +176,26 @@ class HomeViewController: UIViewController {
      */
     /** 하단 카드 뷰 생성 함수 */
     private func setupInfoView(){
+        // 어둡게 만드는 뷰
+        backgroundView = UIView()
+        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.0) // 초기에는 투명
+        backgroundView.translatesAutoresizingMaskIntoConstraints = false
+        backgroundView.isUserInteractionEnabled = false
+        view.addSubview(backgroundView)
+        
+        NSLayoutConstraint.activate([
+            backgroundView.topAnchor.constraint(equalTo: view.topAnchor),
+            backgroundView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            backgroundView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            backgroundView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+        
+        // 카드 뷰
         bottomInfoView = UIView()
         bottomInfoView.backgroundColor = .white
         bottomInfoView.layer.cornerRadius = 20
         bottomInfoView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         bottomInfoView.translatesAutoresizingMaskIntoConstraints = false
-        
         view.addSubview(bottomInfoView)
         
         // 카드 뷰 : 상단 회색 줄 (핸들러 설정)
@@ -192,22 +212,22 @@ class HomeViewController: UIViewController {
             handle.heightAnchor.constraint(equalToConstant: 5)
         ])
         
-        // 카드뷰 제약조건
+        // 카드 뷰 최대 확장 높이 설정 (검색창 기준)
+        view.layoutIfNeeded()
+        expandedTopConstant = searchBarContainer.frame.maxY + 20
+        
         bottomInfoViewTopConstraint = bottomInfoView.topAnchor.constraint(
-            equalTo: view.safeAreaLayoutGuide.bottomAnchor,
-            constant: -collapsedHeight  // collapsed 상태에서도 핸들러 보이기
+            equalTo: view.topAnchor,
+            constant: view.frame.height - collapsedHeight
         )
-        // 중요 : 제약조건에서 view.bottomAnchor가 아닌, safeAreaLayoutGuide로 해야함.
-        // 제약조건 활성화
-        bottomInfoViewTopConstraint.isActive = true
         
         NSLayoutConstraint.activate([
+            bottomInfoViewTopConstraint,
             bottomInfoView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             bottomInfoView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            bottomInfoView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            bottomInfoView.heightAnchor.constraint(equalToConstant: view.frame.height - expandedTopConstant)
         ])
         
-        // 드래그 제스처 연결
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handleInfoViewPan(_:)))
         bottomInfoView.addGestureRecognizer(panGesture)
     }
@@ -217,28 +237,46 @@ class HomeViewController: UIViewController {
         let translation = gesture.translation(in: view)
         let velocity = gesture.velocity(in: view)
         
-        // 현재 위치에서 이동
-        let newTopConstant = bottomInfoViewTopConstraint.constant + translation.y
+        let collapsedTop = view.frame.height - collapsedHeight
+        let expandedTop = expandedTopConstant
         
-        // 제스처 중일 때는 따라다님
-        if gesture.state == .changed {
-            if newTopConstant >= -expandedHeight && newTopConstant <= -collapsedHeight {
-                bottomInfoViewTopConstraint.constant = newTopConstant
+        let newTop = bottomInfoViewTopConstraint.constant + translation.y
+        
+        switch gesture.state {
+        case .changed:
+            if newTop >= expandedTop && newTop <= collapsedTop {
+                bottomInfoViewTopConstraint.constant = newTop
+                updateBackgroundViewOpacity()
                 gesture.setTranslation(.zero, in: view)
             }
-        } else if gesture.state == .ended {
-            // 빠르게 위로 올리면 확장
+            
+        case .ended:
             let shouldExpand = velocity.y < 0
-            animateBottomSheet(expand: shouldExpand)
+            animateInfoView(expand: shouldExpand)
+            
+        default:
+            break
         }
     }
     
     /** 하단 카드 뷰 애니메이션 */
-    private func animateBottomSheet(expand: Bool) {
-        bottomInfoViewTopConstraint.constant = expand ? -expandedHeight : -collapsedHeight
+    private func animateInfoView(expand: Bool) {
+        let targetTop = expand ? expandedTopConstant : view.frame.height - collapsedHeight
+        bottomInfoViewTopConstraint.constant = targetTop
         
-        UIView.animate(withDuration: 0.25, delay: 0, options: [.curveEaseOut], animations: {
+        UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseOut], animations: {
             self.view.layoutIfNeeded()
+            self.updateBackgroundViewOpacity()
         }, completion: nil)
+    }
+    
+    /** 카드 뷰 최대 팝업 시 배경 검은색 제어 */
+    private func updateBackgroundViewOpacity() {
+        let currentTop = bottomInfoViewTopConstraint.constant
+        let collapsedTop = view.frame.height - collapsedHeight
+        let expandedTop = expandedTopConstant
+        
+        let ratio = 1 - ((currentTop - expandedTop) / (collapsedTop - expandedTop))
+        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.3 * ratio)
     }
 }
