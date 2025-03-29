@@ -11,16 +11,21 @@ import NMapsMap
 class HomeViewController: UIViewController {
     
     // 하단 카드뷰
-    private var bottomInfoView: UIView!
-    private var bottomInfoViewTopConstraint: NSLayoutConstraint!
+    private var bottomInfoView: BottomInfoView!
     
-    // 검색창 View
-    private var backgroundView: UIView! // 카드뷰 완전 팝업 시 블랙처리를 위한 View
     private var searchBarContainer: UIView!
     
-    // 카드 뷰 최소 높이
-    private let collapsedHeight: CGFloat = 120
-    private var expandedTopConstant: CGFloat = 100
+    private var bottomInfoViewTopConstraintNeedsReset = true
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // expandedTopConstant가 초기값일 때만 실행
+        if bottomInfoViewTopConstraintNeedsReset {
+            bottomInfoView.configureExpandedTop(searchBarContainer.frame.maxY + 20)
+            bottomInfoView.resetPosition()
+            bottomInfoViewTopConstraintNeedsReset = false
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,7 +34,7 @@ class HomeViewController: UIViewController {
         
         setupSearchBar()
         
-        setupInfoView()
+        bottomInfoView = BottomInfoView(parentView: self.view)
         
     }
     
@@ -169,114 +174,5 @@ class HomeViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         
         return button
-    }
-    
-    /**
-     하단 카드뷰 설정
-     */
-    /** 하단 카드 뷰 생성 함수 */
-    private func setupInfoView(){
-        // 어둡게 만드는 뷰
-        backgroundView = UIView()
-        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.0) // 초기에는 투명
-        backgroundView.translatesAutoresizingMaskIntoConstraints = false
-        backgroundView.isUserInteractionEnabled = false
-        view.addSubview(backgroundView)
-        
-        NSLayoutConstraint.activate([
-            backgroundView.topAnchor.constraint(equalTo: view.topAnchor),
-            backgroundView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            backgroundView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            backgroundView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-        
-        // 카드 뷰
-        bottomInfoView = UIView()
-        bottomInfoView.backgroundColor = .white
-        bottomInfoView.layer.cornerRadius = 20
-        bottomInfoView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        bottomInfoView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(bottomInfoView)
-        
-        // 카드 뷰 : 상단 회색 줄 (핸들러 설정)
-        let handle = UIView()
-        handle.backgroundColor = .systemGray4
-        handle.layer.cornerRadius = 3
-        handle.translatesAutoresizingMaskIntoConstraints = false
-        bottomInfoView.addSubview(handle)
-        
-        NSLayoutConstraint.activate([
-            handle.topAnchor.constraint(equalTo: bottomInfoView.topAnchor, constant: 8),
-            handle.centerXAnchor.constraint(equalTo: bottomInfoView.centerXAnchor),
-            handle.widthAnchor.constraint(equalToConstant: 40),
-            handle.heightAnchor.constraint(equalToConstant: 5)
-        ])
-        
-        // 카드 뷰 최대 확장 높이 설정 (검색창 기준)
-        view.layoutIfNeeded()
-        expandedTopConstant = searchBarContainer.frame.maxY + 20
-        
-        bottomInfoViewTopConstraint = bottomInfoView.topAnchor.constraint(
-            equalTo: view.topAnchor,
-            constant: view.frame.height - collapsedHeight
-        )
-        
-        NSLayoutConstraint.activate([
-            bottomInfoViewTopConstraint,
-            bottomInfoView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            bottomInfoView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            bottomInfoView.heightAnchor.constraint(equalToConstant: view.frame.height - expandedTopConstant)
-        ])
-        
-        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handleInfoViewPan(_:)))
-        bottomInfoView.addGestureRecognizer(panGesture)
-    }
-    
-    /** 하단 카드 뷰 제스처 핸들링 */
-    @objc private func handleInfoViewPan(_ gesture: UIPanGestureRecognizer) {
-        let translation = gesture.translation(in: view)
-        let velocity = gesture.velocity(in: view)
-        
-        let collapsedTop = view.frame.height - collapsedHeight
-        let expandedTop = expandedTopConstant
-        
-        let newTop = bottomInfoViewTopConstraint.constant + translation.y
-        
-        switch gesture.state {
-        case .changed:
-            if newTop >= expandedTop && newTop <= collapsedTop {
-                bottomInfoViewTopConstraint.constant = newTop
-                updateBackgroundViewOpacity()
-                gesture.setTranslation(.zero, in: view)
-            }
-            
-        case .ended:
-            let shouldExpand = velocity.y < 0
-            animateInfoView(expand: shouldExpand)
-            
-        default:
-            break
-        }
-    }
-    
-    /** 하단 카드 뷰 애니메이션 */
-    private func animateInfoView(expand: Bool) {
-        let targetTop = expand ? expandedTopConstant : view.frame.height - collapsedHeight
-        bottomInfoViewTopConstraint.constant = targetTop
-        
-        UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseOut], animations: {
-            self.view.layoutIfNeeded()
-            self.updateBackgroundViewOpacity()
-        }, completion: nil)
-    }
-    
-    /** 카드 뷰 최대 팝업 시 배경 검은색 제어 */
-    private func updateBackgroundViewOpacity() {
-        let currentTop = bottomInfoViewTopConstraint.constant
-        let collapsedTop = view.frame.height - collapsedHeight
-        let expandedTop = expandedTopConstant
-        
-        let ratio = 1 - ((currentTop - expandedTop) / (collapsedTop - expandedTop))
-        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.3 * ratio)
     }
 }

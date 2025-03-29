@@ -42,6 +42,7 @@ class MainTabBarController: UITabBarController {
         appearance.configureWithOpaqueBackground() // 배경 투명 방지
         appearance.backgroundColor = .white // 배경색 설정
         
+        
         // 탭바 아이템 색상 설정
         let itemAppearance = UITabBarItemAppearance()  // UITabBarItemAppearance 객체 생성
             
@@ -67,12 +68,8 @@ class MainTabBarController: UITabBarController {
         }
         
         // 탭바 구분선
-        tabBar.layer.borderWidth = 0.5
+        tabBar.layer.borderWidth = 0.3
         tabBar.layer.borderColor = UIColor.gray.cgColor
-        
-        // cornerRadius 적용 (탭바 배경이 흰색일 때만 효과 있음)
-        tabBar.layer.cornerRadius = 15
-        tabBar.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        tabBar.layer.masksToBounds = true
+ 
     }
 }

@@ -1,0 +1,183 @@
+//
+//  BottomInfoView.swift
+//  jeolhak
+//
+//  Created by 윤대현 on 3/28/25.
+//
+
+/**
+ 하단 카드뷰 설정
+ */
+/** 하단 카드 뷰 생성 클래스  */
+import UIKit
+
+class BottomInfoView: UIView {
+    private let collapsedHeight: CGFloat = 120
+    private var expandedTopConstant: CGFloat = 100
+    private var topConstraint: NSLayoutConstraint!
+    private var backgroundView: UIView!
+    private unowned let parentView: UIView
+    
+    // 외부에서 정의 가능한 콜백 함수 정의
+    // BottomInfoView 안에서 제스처가 발생했을 때 외부에 알리기 위한 이벤트 트리거
+    // (() -> Void)? : 아무 인자도 받지 않고, 아무것도 반환하지 않는 클로저 타입 (옵셔널)
+    var onPanChanged: (() -> Void)?
+    
+    // 커스텀 이니셜라이저
+    init(parentView: UIView) {
+        // 인자로 받아온 부모 뷰를 활용
+        self.parentView = parentView
+        super.init(frame: .zero)
+        translatesAutoresizingMaskIntoConstraints = false
+        setupBackgroundView()
+        setupBottomInfoView()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    /** 카드 뷰가 올라올 때 부모 뷰 블랙 */
+    private func setupBackgroundView() {
+        backgroundView = UIView()
+        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.0)
+        backgroundView.translatesAutoresizingMaskIntoConstraints = false
+        backgroundView.isUserInteractionEnabled = false
+        
+        parentView.addSubview(backgroundView)
+        
+        NSLayoutConstraint.activate([
+            backgroundView.topAnchor.constraint(equalTo: parentView.topAnchor),
+            backgroundView.leadingAnchor.constraint(equalTo: parentView.leadingAnchor),
+            backgroundView.trailingAnchor.constraint(equalTo: parentView.trailingAnchor),
+            backgroundView.bottomAnchor.constraint(equalTo: parentView.bottomAnchor)
+        ])
+    }
+    
+    /** 카드 뷰 설정 함수 */
+    private func setupBottomInfoView() {
+        backgroundColor = .white
+        layer.cornerRadius = 20
+        layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        
+        // 해당 함수가 실행중인 클래스 인스턴스 자체를 부모 뷰에 추가 : self
+        parentView.addSubview(self)
+        
+        // Handler
+        let handle = UIView()
+        handle.backgroundColor = .systemGray4
+        handle.layer.cornerRadius = 3
+        handle.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(handle)
+        
+        NSLayoutConstraint.activate([
+            handle.topAnchor.constraint(equalTo: topAnchor, constant: 8),
+            handle.centerXAnchor.constraint(equalTo: centerXAnchor),
+            handle.widthAnchor.constraint(equalToConstant: 40),
+            handle.heightAnchor.constraint(equalToConstant: 5)
+        ])
+        
+        topConstraint = topAnchor.constraint(equalTo: parentView.topAnchor, constant: parentView.frame.height - collapsedHeight)
+        
+        NSLayoutConstraint.activate([
+            topConstraint,
+            leadingAnchor.constraint(equalTo: parentView.leadingAnchor),
+            trailingAnchor.constraint(equalTo: parentView.trailingAnchor),
+            heightAnchor.constraint(equalToConstant: parentView.frame.height * 0.7) // 임시 높이
+        ])
+        
+        // UIPanGestureRecognizer : 드래그(pan) 제스처 감지
+        // target: self -> 제스처가 발생하고 있는 클래스 인스턴스
+        // action: #selector(handlePan(_:)) -> 해당 클래스 인스턴스에 존재하는
+        // handlePan(_:) 메서드 호출
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
+        addGestureRecognizer(panGesture)
+    }
+    
+    /** 드래그(팬, 제스쳐)  컨트롤 함수 */
+    @objc private func handlePan(_ gesture: UIPanGestureRecognizer) {
+        // 사용자가 얼마나 움직였는지 좌표로 반환
+        // 예 : 아래로 50pt 움직였으면 CGPoint(x: 0, y: 50) 반환
+        let translation = gesture.translation(in: parentView)
+        // 사용자가 움직인 속도를 반환
+        // 예 : 해당 반환값을 바탕으로 위로 쓸었는지, 아래로 쓸었는지 판단 가능
+        let velocity = gesture.velocity(in: parentView)
+        
+        // 카드뷰가 최소한으로 내려갔을 때 Y값
+        let collapsedTop = parentView.frame.height - collapsedHeight
+        // 카드뷰가 최대로 올라갔을 때 위치
+        let expandedTop = expandedTopConstant
+        
+        // 현재 카드뷰의 Y 위치와 드래그로 얼마나 움직였는지 감지
+        let newTop = topConstraint.constant + translation.y
+        
+        switch gesture.state {
+        // 드래그중일때
+        case .changed:
+            // newTop : 현재 카드뷰의 위치
+            if newTop >= expandedTop && newTop <= collapsedTop {
+                // 현재 카드뷰가 상하 한계 범위에 있으면 카드뷰 이동
+                topConstraint.constant = newTop
+                updateBackgroundOpacity()
+                // 다음 제스쳐를 계산하기 위해 움직인 값 초기화
+                gesture.setTranslation(.zero, in: parentView)
+                // 클로저 호출 (부모뷰에게 제스처중임을 알리기)
+                onPanChanged?()
+            }
+        // 드래그가 끝났을 때
+        case .ended:
+            // 손가락을 위로 쓸었으면(true) 카드뷰를 위로 올리기
+            // 손가락을 아래로 쓸었으면(false) 카드뷰를 아래로 내리기
+            let shouldExpand = velocity.y < 0
+            // 애니메이션 진행
+            animate(expand: shouldExpand)
+        default:
+            break
+        }
+    }
+    
+    /** 카드 뷰 애니메이션 컨트롤
+        true: 카드뷰 열린상태
+        false : 카드뷰 닫힌 상태
+     */
+    private func animate(expand: Bool) {
+        // 카드뷰가 열려있다면(true) 완전히 펼친 위치로 이동
+        // 카드뷰가 닫혀있다면(false) 닫힌 상태로 이동
+        let targetTop = expand ? expandedTopConstant : parentView.frame.height - collapsedHeight
+        // 카드뷰 위치 업데이트
+        topConstraint.constant = targetTop
+        
+        // 애니메이션 시작
+        // withDuration: 0.3 -> 애니메이션 지속 시간
+        // delay: 0 -> 지연시간 없음
+        // options: [.curveEaseOut] : 느리게 멈추기
+        UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseOut], animations: {
+            // 바뀐 제약조건을 즉시 반영하여 카드뷰가 부드럽게 이동하도록 유도
+            self.parentView.layoutIfNeeded()
+            self.updateBackgroundOpacity()
+        })
+    }
+    
+    /** 카드 뷰를 사용하는 부모 뷰의 배경색 변경 */
+    private func updateBackgroundOpacity() {
+        let currentTop = topConstraint.constant
+        let collapsedTop = parentView.frame.height - collapsedHeight
+        let expandedTop = expandedTopConstant
+        
+        let ratio = 1 - ((currentTop - expandedTop) / (collapsedTop - expandedTop))
+        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.3 * ratio)
+    }
+    
+    // 퍼블릭 인터페이스 : 외부에서 BottomInfoView 상태 제어
+    /** 카드뷰가 최대로 올라갈 수 있는 위치 설정
+     ex) bottomInfoView.configureExpandedTop(searchBarContainer.frame.maxY + 20)
+     */
+    func configureExpandedTop(_ yValue: CGFloat) {
+        expandedTopConstant = yValue
+    }
+    
+    /** 카드 뷰 위치 초기화 -> 접혀 있는 상태로 카드뷰 강제 이동 */
+    func resetPosition() {
+        topConstraint.constant = parentView.frame.height - collapsedHeight
+    }
+}
