@@ -170,7 +170,7 @@ class HomeViewController: UIViewController {
         let button = UIButton()
         
         button.setImage(UIImage(systemName: imageName), for: .normal)
-        button.tintColor = .systemPink
+        button.tintColor = .mainPink
         button.translatesAutoresizingMaskIntoConstraints = false
         
         return button

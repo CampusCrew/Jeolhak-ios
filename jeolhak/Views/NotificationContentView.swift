@@ -27,7 +27,7 @@ class NotificationContentView: UIView {
         
         layer.cornerRadius = 20
         layer.borderWidth = 0.5
-        layer.borderColor = UIColor.systemPink.cgColor
+        layer.borderColor = UIColor.mainPink.cgColor
         
         // 그림자
         layer.shadowColor = UIColor.black.cgColor
@@ -40,7 +40,7 @@ class NotificationContentView: UIView {
     private func setupContent(){
         // 아이콘 배경
         let iconBackground = UIView()
-        iconBackground.backgroundColor = .systemPink
+        iconBackground.backgroundColor = .mainPink
         iconBackground.layer.cornerRadius = 20
         iconBackground.clipsToBounds = true
         iconBackground.translatesAutoresizingMaskIntoConstraints = false
@@ -63,7 +63,7 @@ class NotificationContentView: UIView {
         let label = UILabel()
         label.text = content
         label.font = UIFont(name: "Jua-Regular", size: 20)
-        label.textColor = .systemPink
+        label.textColor = .mainPink
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         

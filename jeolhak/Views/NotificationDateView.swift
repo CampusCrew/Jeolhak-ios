@@ -14,7 +14,7 @@ class NotificationDateView: UIView {
     init(date: String) {
         self.date = date
         super.init(frame: .zero)
-        backgroundColor = .systemPink
+        backgroundColor = .mainPink
         
         layer.cornerRadius = 20
         layer.masksToBounds = true

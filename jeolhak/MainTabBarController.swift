@@ -51,7 +51,7 @@ class MainTabBarController: UITabBarController {
         itemAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.gray]
         
         // 미선택된 아이템 스타일 설정
-        itemAppearance.normal.iconColor = UIColor.systemPink
+        itemAppearance.normal.iconColor = .mainPink
         itemAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.systemPink]
     
         // appearance에 itemAppearance 적용
