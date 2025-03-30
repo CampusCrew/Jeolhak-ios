@@ -8,7 +8,14 @@
 import UIKit
 
 class NotificationViewController: UIViewController {
+    
+    private var dateView: UIView!
+    
     override func viewDidLoad() {
-        self.view.backgroundColor = .green
+        super.viewDidLoad()
+        
+        dateView = NotificationValueView(image: "star", content: "새로운 가게가 등록되었습니다.")
+        
+        view.addSubview(dateView)
     }
 }
