@@ -11,10 +11,13 @@ class NotificationContentView: UIView {
 
     private var image: String
     private var content: String
+    private let color: UIColor!
     
-    init(image: String, content: String){
+    init(image: String, content: String, color: UIColor){
         self.image = image
         self.content = content
+        self.color = color
+        
         super.init(frame: .zero)
 
         setupView()
@@ -40,7 +43,7 @@ class NotificationContentView: UIView {
     private func setupContent(){
         // 아이콘 배경
         let iconBackground = UIView()
-        iconBackground.backgroundColor = .mainPink
+        iconBackground.backgroundColor = color
         iconBackground.layer.cornerRadius = 20
         iconBackground.clipsToBounds = true
         iconBackground.translatesAutoresizingMaskIntoConstraints = false

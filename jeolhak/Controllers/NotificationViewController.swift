@@ -11,12 +11,14 @@ class NotificationViewController: UIViewController {
     
     private var dateView: UIView!
     
-    private var contentView: UIView!
+    private var contentView1: UIView!
+    
+    private var contentView2: UIView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        dateView = NotificationDateView(date: "3월 30일")
+        dateView = NotificationDateView(date: "오늘")
         view.addSubview(dateView)
         dateView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -26,14 +28,24 @@ class NotificationViewController: UIViewController {
             dateView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
         
-        contentView = NotificationContentView(image: "speaker.fill", content: "새로운 가게가 등록되었어요")
-        view.addSubview(contentView)
-        contentView.translatesAutoresizingMaskIntoConstraints = false
+        contentView1 = NotificationContentView(image: "speaker.wave.1.fill", content: "새로운 가게가 등록되었어요", color: .mainPink)
+        view.addSubview(contentView1)
+        contentView1.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            contentView.topAnchor.constraint(equalTo: dateView.bottomAnchor, constant: 15),
-            contentView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            contentView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
+            contentView1.topAnchor.constraint(equalTo: dateView.bottomAnchor, constant: 15),
+            contentView1.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            contentView1.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
+        ])
+        
+        contentView2 = NotificationContentView(image: "bell.fill", content: "할인 기간이 이틀 남았어요", color: .mainMint)
+        view.addSubview(contentView2)
+        contentView2.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            contentView2.topAnchor.constraint(equalTo: contentView1.bottomAnchor, constant: 15),
+            contentView2.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            contentView2.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
         ])
     }
 }
