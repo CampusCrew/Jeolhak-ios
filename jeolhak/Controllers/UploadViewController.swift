@@ -9,6 +9,6 @@ import UIKit
 
 class UploadViewController: UIViewController {
     override func viewDidLoad() {
-        self.view.backgroundColor = .brown
+        view.backgroundColor = .clear
     }
 }

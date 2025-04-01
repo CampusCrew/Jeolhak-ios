@@ -6,16 +6,28 @@
 //
 
 import UIKit
+// 위치 정보 관리
+import CoreLocation
+// 네이버 지도
 import NMapsMap
 
-class HomeViewController: UIViewController {
+class HomeViewController: UIViewController, CLLocationManagerDelegate {
+    
+    // 위치 정보 관리자
+    var locationManager = CLLocationManager()
+    
+    // 네이버 지도 객체
+    private var mainMapView: NMFNaverMapView!
+    // 지도 호출 여부 플래그
+    private var isMapInitialized = false
     
     // 하단 카드뷰
     private var bottomInfoView: BottomInfoView!
+    private var bottomInfoViewTopConstraintNeedsReset = true
     
+    // 검색 뷰
     private var searchBarContainer: UIView!
     
-    private var bottomInfoViewTopConstraintNeedsReset = true
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -27,39 +39,102 @@ class HomeViewController: UIViewController {
         }
     }
     
+    // 뷰 최초 실행 사이클
     override func viewDidLoad() {
         super.viewDidLoad()
+        // 위치 설정
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.requestWhenInUseAuthorization()
         
-        setupMapView()
+        // 포그라운드 감지
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appWillEnterForeground),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil
+        )
         
         setupSearchBar()
-        
         bottomInfoView = BottomInfoView(parentView: self.view)
         
+        // 앱 실행 시 위치 업데이트 강제 요청
+        locationManager.startUpdatingLocation()
+    }
+    
+    // 앱이 포그라운드로 복귀했을 때 실행되는 함수
+    @objc private func appWillEnterForeground(){
+        print("실행")
+        if mainMapView == nil {
+            setupMapView()
+        }
+        locationManager.startUpdatingLocation()
+    }
+    
+    // 권한 변경 감지
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager){
+        switch manager.authorizationStatus {
+        case .authorizedWhenInUse, .authorizedAlways:
+            print("위치 권한 허용 -> 위치 업데이트 시작")
+            locationManager.startUpdatingLocation()
+        case .denied, .restricted:
+            print("위치 권한 거부됨.")
+            setupMapView() // 위치는 초기값으로 지정
+        case .notDetermined:
+            break
+        @unknown default:
+            break
+        }
+    }
+    
+    // 위치 감지
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let location = locations.first else { return }
+        let latLng = NMGLatLng(lat: location.coordinate.latitude, lng: location.coordinate.longitude)
+        let cameraUpdate = NMFCameraUpdate(scrollTo: latLng)
+        cameraUpdate.animation = .easeIn
+        
+        // 지도 없을 시 지도 초기 세팅
+        if mainMapView == nil {
+            setupMapView()
+        }
+        
+        // 항상 현재 위치로 카메라 이동
+        mainMapView?.mapView.moveCamera(cameraUpdate)
+        
+        // 위치 업데이트 중단
+        locationManager.stopUpdatingLocation()
     }
     
     /** 지도 설정 함수 */
     private func setupMapView(){
-        let mapView = NMFMapView(frame: view.frame)
-        mapView.translatesAutoresizingMaskIntoConstraints = false
-        mapView.mapType = .basic
+        mainMapView = NMFNaverMapView(frame: view.frame)
+        mainMapView.translatesAutoresizingMaskIntoConstraints = false
+        mainMapView.mapView.mapType = .basic
+        // 지도 줌 버튼 활성화
+        mainMapView.showScaleBar = true
+        // 현 위치 버튼 활성화
+        mainMapView.showLocationButton = true
+        // 위치 추적 모드 : PositionDirection 활성화
+        mainMapView.mapView.positionMode = .direction
         
-        let cameraUpdate = NMFCameraUpdate(scrollTo: NMGLatLng(lat: 35.9684, lng: 126.9581))
+        // 네이버 로고 위치
+        mainMapView.mapView.logoAlign = .rightBottom
+        mainMapView.mapView.logoMargin = UIEdgeInsets(top: 0, left: 0, bottom: 40, right: 10)
+
         
-        mapView.moveCamera(cameraUpdate)
-        
-        view.addSubview(mapView)
+        view.insertSubview(mainMapView, at: 0)
         
         // 지도 Auto Layout
         NSLayoutConstraint.activate([
             // 화면 상단에 맞추기
-            mapView.topAnchor.constraint(equalTo: view.topAnchor),
+            mainMapView.topAnchor.constraint(equalTo: view.topAnchor),
             // 화면 좌측에 맞추기
-            mapView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            mainMapView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             // 화면 우측에 맞추기
-            mapView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            mainMapView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             // 화면 하단에 맞추기
-            mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            mainMapView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
     

@@ -5,15 +5,9 @@
 //  Created by 윤대현 on 3/27/25.
 //
 
-/**
- 시작 화면
- */
-
 import UIKit
-// 위치 정보 관리
-import CoreLocation
 
-class MainTabBarController: UITabBarController {
+class TabBarController: UITabBarController {
     
     let homeVC = HomeViewController()
     let favoriteVC = FavoriteViewController()
@@ -27,7 +21,6 @@ class MainTabBarController: UITabBarController {
         self.viewControllers = controllers.map{
             UINavigationController(rootViewController: $0)
         }
-        
         setTabBar()
     }
     
@@ -52,10 +45,9 @@ class MainTabBarController: UITabBarController {
         itemAppearance.selected.iconColor = UIColor.gray
         itemAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.gray]
         
-        
         // 미선택된 아이템 스타일 설정
         itemAppearance.normal.iconColor = .mainPink
-        itemAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.mainPink]
+        itemAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.systemPink]
     
         // appearance에 itemAppearance 적용
         appearance.stackedLayoutAppearance = itemAppearance
@@ -73,6 +65,5 @@ class MainTabBarController: UITabBarController {
         // 탭바 구분선
         tabBar.layer.borderWidth = 0.3
         tabBar.layer.borderColor = UIColor.gray.cgColor
- 
     }
 }
