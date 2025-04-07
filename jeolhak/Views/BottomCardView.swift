@@ -1,5 +1,5 @@
 //
-//  BottomInfoView.swift
+//  BottomCardView.swift
 //  jeolhak
 //
 //  Created by 윤대현 on 3/28/25.
@@ -11,7 +11,7 @@
 /** 하단 카드 뷰 생성 클래스  */
 import UIKit
 
-class BottomInfoView: UIView {
+class BottomCardView: UIView {
     private let collapsedHeight: CGFloat = 120
     private var expandedTopConstant: CGFloat = 100
     private var topConstraint: NSLayoutConstraint!
@@ -19,7 +19,7 @@ class BottomInfoView: UIView {
     private unowned let parentView: UIView
     
     // 외부에서 정의 가능한 콜백 함수 정의
-    // BottomInfoView 안에서 제스처가 발생했을 때 외부에 알리기 위한 이벤트 트리거
+    // BottomCardView 안에서 제스처가 발생했을 때 외부에 알리기 위한 이벤트 트리거
     // (() -> Void)? : 아무 인자도 받지 않고, 아무것도 반환하지 않는 클로저 타입 (옵셔널)
     var onPanChanged: (() -> Void)?
     
@@ -168,9 +168,9 @@ class BottomInfoView: UIView {
         backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.3 * ratio)
     }
     
-    // 퍼블릭 인터페이스 : 외부에서 BottomInfoView 상태 제어
+    // 퍼블릭 인터페이스 : 외부에서 BottomCardView 상태 제어
     /** 카드뷰가 최대로 올라갈 수 있는 위치 설정
-     ex) bottomInfoView.configureExpandedTop(searchBarContainer.frame.maxY + 20)
+     ex) bottomCardView.configureExpandedTop(searchBarContainer.frame.maxY + 20)
      */
     func configureExpandedTop(_ yValue: CGFloat) {
         expandedTopConstant = yValue

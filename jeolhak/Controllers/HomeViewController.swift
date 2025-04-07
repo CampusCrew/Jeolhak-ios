@@ -14,7 +14,7 @@ import NMapsMap
 class HomeViewController: UIViewController, CLLocationManagerDelegate {
     
     // 하단 카드뷰
-    private var bottomInfoView: BottomInfoView!
+    private var bottomCardView: BottomCardView!
     private var bottomInfoViewTopConstraintNeedsReset = true
     
     // 검색 뷰
@@ -28,8 +28,8 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         super.viewDidLayoutSubviews()
         // expandedTopConstant가 초기값일 때만 실행
         if bottomInfoViewTopConstraintNeedsReset {
-            bottomInfoView.configureExpandedTop(searchBarContainer.frame.maxY + 20)
-            bottomInfoView.resetPosition()
+            bottomCardView.configureExpandedTop(searchBarContainer.frame.maxY + 20)
+            bottomCardView.resetPosition()
             bottomInfoViewTopConstraintNeedsReset = false
         }
     }
@@ -52,7 +52,7 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         
         MapManager.shared.setMapView(mapContainerView.customMapView.mapView)
         setupSearchBar()
-        bottomInfoView = BottomInfoView(parentView: self.view)
+        bottomCardView = BottomCardView(parentView: self.view)
     }
     
     /** 검색창 설정  */
