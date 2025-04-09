@@ -12,9 +12,12 @@
 import UIKit
 
 class BottomCardView: UIView {
-    private let collapsedHeight: CGFloat = 120
-    private var expandedTopConstant: CGFloat = 100
+    // 닫힌 상태의 카드 뷰 최소 높이
+    private var minCardViewHeight: CGFloat!
+    // 열린 상태의 카드 뷰 최대 높이
+    private var maxCardViewHeight: CGFloat = 100
     private var topConstraint: NSLayoutConstraint!
+    
     private var backgroundView: UIView!
     private unowned let parentView: UIView
     
@@ -24,13 +27,14 @@ class BottomCardView: UIView {
     var onPanChanged: (() -> Void)?
     
     // 커스텀 이니셜라이저
-    init(parentView: UIView) {
+    init(parentView: UIView, height: CGFloat) {
         // 인자로 받아온 부모 뷰를 활용
         self.parentView = parentView
+        self.minCardViewHeight = height
         super.init(frame: .zero)
         translatesAutoresizingMaskIntoConstraints = false
         setupBackgroundView()
-        setupBottomInfoView()
+        setupBottomCardView()
     }
     
     required init?(coder: NSCoder) {
@@ -55,7 +59,7 @@ class BottomCardView: UIView {
     }
     
     /** 카드 뷰 설정 함수 */
-    private func setupBottomInfoView() {
+    private func setupBottomCardView() {
         backgroundColor = .white
         layer.cornerRadius = 20
         layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
@@ -77,13 +81,13 @@ class BottomCardView: UIView {
             handle.heightAnchor.constraint(equalToConstant: 5)
         ])
         
-        topConstraint = topAnchor.constraint(equalTo: parentView.topAnchor, constant: parentView.frame.height - collapsedHeight)
-        
+        topConstraint = topAnchor.constraint(equalTo: parentView.topAnchor, constant: parentView.frame.height - minCardViewHeight)
+
         NSLayoutConstraint.activate([
             topConstraint,
             leadingAnchor.constraint(equalTo: parentView.leadingAnchor),
             trailingAnchor.constraint(equalTo: parentView.trailingAnchor),
-            heightAnchor.constraint(equalToConstant: parentView.frame.height * 0.7) // 임시 높이
+            bottomAnchor.constraint(equalTo: parentView.bottomAnchor, constant: -safeAreaInset()),
         ])
         
         // UIPanGestureRecognizer : 드래그(pan) 제스처 감지
@@ -92,6 +96,13 @@ class BottomCardView: UIView {
         // handlePan(_:) 메서드 호출
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
         addGestureRecognizer(panGesture)
+    }
+    
+    private func safeAreaInset() -> CGFloat {
+        if #available(iOS 11.0, *) {
+            return parentView.safeAreaInsets.bottom
+        }
+        return 0
     }
     
     /** 드래그(팬, 제스쳐)  컨트롤 함수 */
@@ -104,9 +115,9 @@ class BottomCardView: UIView {
         let velocity = gesture.velocity(in: parentView)
         
         // 카드뷰가 최소한으로 내려갔을 때 Y값
-        let collapsedTop = parentView.frame.height - collapsedHeight
+        let collapsedTop = parentView.frame.height - minCardViewHeight
         // 카드뷰가 최대로 올라갔을 때 위치
-        let expandedTop = expandedTopConstant
+        let expandedTop = maxCardViewHeight
         
         // 현재 카드뷰의 Y 위치와 드래그로 얼마나 움직였는지 감지
         let newTop = topConstraint.constant + translation.y
@@ -143,7 +154,7 @@ class BottomCardView: UIView {
     private func animate(expand: Bool) {
         // 카드뷰가 열려있다면(true) 완전히 펼친 위치로 이동
         // 카드뷰가 닫혀있다면(false) 닫힌 상태로 이동
-        let targetTop = expand ? expandedTopConstant : parentView.frame.height - collapsedHeight
+        let targetTop = expand ? maxCardViewHeight : parentView.frame.height - minCardViewHeight
         // 카드뷰 위치 업데이트
         topConstraint.constant = targetTop
         
@@ -161,8 +172,8 @@ class BottomCardView: UIView {
     /** 카드 뷰를 사용하는 부모 뷰의 배경색 변경 */
     private func updateBackgroundOpacity() {
         let currentTop = topConstraint.constant
-        let collapsedTop = parentView.frame.height - collapsedHeight
-        let expandedTop = expandedTopConstant
+        let collapsedTop = parentView.frame.height - minCardViewHeight
+        let expandedTop = maxCardViewHeight
         
         let ratio = 1 - ((currentTop - expandedTop) / (collapsedTop - expandedTop))
         backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.3 * ratio)
@@ -172,12 +183,19 @@ class BottomCardView: UIView {
     /** 카드뷰가 최대로 올라갈 수 있는 위치 설정
      ex) bottomCardView.configureExpandedTop(searchBarContainer.frame.maxY + 20)
      */
-    func configureExpandedTop(_ yValue: CGFloat) {
-        expandedTopConstant = yValue
+    func setMaxCardHight(_ yValue: CGFloat) {
+        maxCardViewHeight = yValue
     }
     
     /** 카드 뷰 위치 초기화 -> 접혀 있는 상태로 카드뷰 강제 이동 */
-    func resetPosition() {
-        topConstraint.constant = parentView.frame.height - collapsedHeight
+    func closeCardView() {
+        let collapsedTop = parentView.frame.height - minCardViewHeight
+        topConstraint.constant = collapsedTop
+        parentView.layoutIfNeeded()
+    }
+    
+    /** 백그라운드 초기화 */
+    func resetBackgroundColor(){
+        backgroundView.backgroundColor = .clear
     }
 }

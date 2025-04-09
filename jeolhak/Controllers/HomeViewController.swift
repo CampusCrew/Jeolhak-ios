@@ -26,12 +26,19 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        // expandedTopConstant가 초기값일 때만 실행
+        // 카드 최대 높이가 초기값일 때만 실행
         if bottomInfoViewTopConstraintNeedsReset {
-            bottomCardView.configureExpandedTop(searchBarContainer.frame.maxY + 20)
-            bottomCardView.resetPosition()
+            bottomCardView.setMaxCardHight(searchBarContainer.frame.maxY + 20)
+            bottomCardView.closeCardView()
             bottomInfoViewTopConstraintNeedsReset = false
         }
+    }
+    
+    // 다른 탭으로 이동할 때
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        bottomCardView.closeCardView()
+        bottomCardView.resetBackgroundColor()
     }
     
     // 뷰 최초 실행 사이클
@@ -52,7 +59,7 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         
         MapManager.shared.setMapView(mapContainerView.customMapView.mapView)
         setupSearchBar()
-        bottomCardView = BottomCardView(parentView: self.view)
+        bottomCardView = BottomCardView(parentView: self.view, height: 120)
     }
     
     /** 검색창 설정  */
