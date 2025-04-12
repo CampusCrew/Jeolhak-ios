@@ -59,7 +59,7 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         
         MapManager.shared.setMapView(mapContainerView.customMapView.mapView)
         setupSearchBar()
-        bottomCardView = BottomCardView(parentView: self.view, height: 120)
+        bottomCardView = BottomCardView(parentView: self.view, height: 120, isHomeViewCheck: true)
     }
     
     /** 검색창 설정  */

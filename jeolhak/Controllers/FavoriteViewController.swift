@@ -48,6 +48,6 @@ class FavoriteViewController: UIViewController {
         ])
         
         MapManager.shared.setMapView(mapContainerView.customMapView.mapView)
-        bottomCardView = BottomCardView(parentView: self.view, height: 300)
+        bottomCardView = BottomCardView(parentView: self.view, height: 300, isHomeViewCheck: false)
     }
 }

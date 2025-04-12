@@ -21,16 +21,21 @@ class BottomCardView: UIView {
     private var backgroundView: UIView!
     private unowned let parentView: UIView
     
+    // 어떤 뷰에서 카드뷰 호출인지 확인
+    // true : HomeView에서 호출, false : FavoriteView에서 호출
+    private var isHomeViewCheck: Bool
+    
     // 외부에서 정의 가능한 콜백 함수 정의
     // BottomCardView 안에서 제스처가 발생했을 때 외부에 알리기 위한 이벤트 트리거
     // (() -> Void)? : 아무 인자도 받지 않고, 아무것도 반환하지 않는 클로저 타입 (옵셔널)
     var onPanChanged: (() -> Void)?
     
     // 커스텀 이니셜라이저
-    init(parentView: UIView, height: CGFloat) {
+    init(parentView: UIView, height: CGFloat, isHomeViewCheck: Bool) {
         // 인자로 받아온 부모 뷰를 활용
         self.parentView = parentView
         self.minCardViewHeight = height
+        self.isHomeViewCheck = isHomeViewCheck
         super.init(frame: .zero)
         translatesAutoresizingMaskIntoConstraints = false
         setupBackgroundView()
@@ -80,6 +85,26 @@ class BottomCardView: UIView {
             handle.widthAnchor.constraint(equalToConstant: 40),
             handle.heightAnchor.constraint(equalToConstant: 5)
         ])
+        
+        if isHomeViewCheck {
+            let testView = HomeContentItemView(
+                shopImage: "testImage",
+                shopTitle: "GT커피 모현점",
+                shopCategory: "디저트",
+                shopContent: "아름다운 인테리어와 분위기 좋은 공간",
+                shopFavorite: false
+            )
+            
+            addSubview(testView)
+            
+            NSLayoutConstraint.activate([
+                testView.topAnchor.constraint(equalTo: handle.topAnchor, constant: 15),
+                testView.leadingAnchor.constraint(equalTo: parentView.leadingAnchor, constant: 20),
+                testView.trailingAnchor.constraint(equalTo: parentView.trailingAnchor, constant: -20)
+            ])
+        } else {
+            print("관심뷰에서 호출")
+        }
         
         topConstraint = topAnchor.constraint(equalTo: parentView.topAnchor, constant: parentView.frame.height - minCardViewHeight)
 
