@@ -87,7 +87,7 @@ class BottomCardView: UIView {
         ])
         
         if isHomeViewCheck {
-            let testView = HomeContentItemView(
+            let homeTestView = HomeContentItemView(
                 shopImage: "testImage",
                 shopTitle: "GT커피 모현점",
                 shopCategory: "디저트",
@@ -95,15 +95,29 @@ class BottomCardView: UIView {
                 shopFavorite: false
             )
             
-            addSubview(testView)
+            addSubview(homeTestView)
             
             NSLayoutConstraint.activate([
-                testView.topAnchor.constraint(equalTo: handle.topAnchor, constant: 15),
-                testView.leadingAnchor.constraint(equalTo: parentView.leadingAnchor, constant: 20),
-                testView.trailingAnchor.constraint(equalTo: parentView.trailingAnchor, constant: -20)
+                homeTestView.topAnchor.constraint(equalTo: handle.topAnchor, constant: 15),
+                homeTestView.leadingAnchor.constraint(equalTo: parentView.leadingAnchor, constant: 20),
+                homeTestView.trailingAnchor.constraint(equalTo: parentView.trailingAnchor, constant: -20)
             ])
         } else {
-            print("관심뷰에서 호출")
+            let favoriteTestView = FavoriteContentItemView(
+                shopTitle: "GT커피 모현점",
+                shopCategory: "디저트",
+                shopLocation: "익산시 서동로 18길 42",
+                shopImage: "testImage",
+                shopFavorite: false
+            )
+            
+            addSubview(favoriteTestView)
+            
+            NSLayoutConstraint.activate([
+                favoriteTestView.topAnchor.constraint(equalTo: handle.topAnchor, constant: 15),
+                favoriteTestView.leadingAnchor.constraint(equalTo: parentView.leadingAnchor, constant: 20),
+                favoriteTestView.trailingAnchor.constraint(equalTo: parentView.trailingAnchor, constant: -20)
+            ])
         }
         
         topConstraint = topAnchor.constraint(equalTo: parentView.topAnchor, constant: parentView.frame.height - minCardViewHeight)

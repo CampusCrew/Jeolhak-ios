@@ -61,8 +61,8 @@ class MainTabBarController: UITabBarController {
         appearance.stackedLayoutAppearance = itemAppearance
         
         // 텍스트 스타일
-        let attributes = [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 15)]
-        UITabBarItem.appearance().setTitleTextAttributes(attributes, for: .normal)
+        let attributes = [NSAttributedString.Key.font: UIFont(name: "Jua-Regular", size: 15)]
+        UITabBarItem.appearance().setTitleTextAttributes(attributes as [NSAttributedString.Key : Any], for: .normal)
         
         // 적용
         tabBar.standardAppearance = appearance
