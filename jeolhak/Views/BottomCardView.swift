@@ -12,6 +12,10 @@
 import UIKit
 
 class BottomCardView: UIView {
+    
+    private let tableView = UITableView()
+    private var homeShopData: [HomeShopData] = []
+    
     // 닫힌 상태의 카드 뷰 최소 높이
     private var minCardViewHeight: CGFloat!
     // 열린 상태의 카드 뷰 최대 높이
@@ -87,37 +91,40 @@ class BottomCardView: UIView {
         ])
         
         if isHomeViewCheck {
-            let homeTestView = HomeContentItemView(
-                shopImage: "testImage",
-                shopTitle: "GT커피 모현점",
-                shopCategory: "디저트",
-                shopContent: "아름다운 인테리어와 분위기 좋은 공간",
-                shopFavorite: false
-            )
+            tableView.translatesAutoresizingMaskIntoConstraints = false
+            tableView.separatorStyle = .none
+            tableView.showsVerticalScrollIndicator = false
+            tableView.dataSource = self
+            tableView.delegate = self
+            tableView.register(HomeContentTableViewCell.self, forCellReuseIdentifier: HomeContentTableViewCell.identifier)
             
-            addSubview(homeTestView)
+            // 임시 데이터 삽입
+            homeShopData = sampleHomeShops
+            
+            addSubview(tableView)
             
             NSLayoutConstraint.activate([
-                homeTestView.topAnchor.constraint(equalTo: handle.topAnchor, constant: 15),
-                homeTestView.leadingAnchor.constraint(equalTo: parentView.leadingAnchor, constant: 20),
-                homeTestView.trailingAnchor.constraint(equalTo: parentView.trailingAnchor, constant: -20)
+                tableView.topAnchor.constraint(equalTo: handle.bottomAnchor, constant: 12),
+                tableView.leadingAnchor.constraint(equalTo: parentView.leadingAnchor, constant: 20),
+                tableView.trailingAnchor.constraint(equalTo: parentView.trailingAnchor, constant: -20),
+                tableView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -safeAreaInset())
             ])
         } else {
-            let favoriteTestView = FavoriteContentItemView(
-                shopTitle: "GT커피 모현점",
-                shopCategory: "디저트",
-                shopLocation: "익산시 서동로 18길 42",
-                shopImage: "testImage",
-                shopFavorite: false
-            )
-            
-            addSubview(favoriteTestView)
-            
-            NSLayoutConstraint.activate([
-                favoriteTestView.topAnchor.constraint(equalTo: handle.topAnchor, constant: 15),
-                favoriteTestView.leadingAnchor.constraint(equalTo: parentView.leadingAnchor, constant: 20),
-                favoriteTestView.trailingAnchor.constraint(equalTo: parentView.trailingAnchor, constant: -20)
-            ])
+//            let favoriteTestView = FavoriteContentItemView(
+//                shopTitle: "GT커피 모현점",
+//                shopCategory: "디저트",
+//                shopLocation: "익산시 서동로 18길 42",
+//                shopImage: "testImage",
+//                shopFavorite: false
+//            )
+//            
+//            addSubview(favoriteTestView)
+//            
+//            NSLayoutConstraint.activate([
+//                favoriteTestView.topAnchor.constraint(equalTo: handle.topAnchor, constant: 15),
+//                favoriteTestView.leadingAnchor.constraint(equalTo: parentView.leadingAnchor, constant: 20),
+//                favoriteTestView.trailingAnchor.constraint(equalTo: parentView.trailingAnchor, constant: -20)
+//            ])
         }
         
         topConstraint = topAnchor.constraint(equalTo: parentView.topAnchor, constant: parentView.frame.height - minCardViewHeight)
@@ -236,5 +243,34 @@ class BottomCardView: UIView {
     /** 백그라운드 초기화 */
     func resetBackgroundColor(){
         backgroundView.backgroundColor = .clear
+    }
+}
+
+// MARK: - 카드뷰 확장
+extension BottomCardView: UITableViewDataSource, UITableViewDelegate {
+    
+    // 셀 개수 지정
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return homeShopData.count
+    }
+    
+    // 셀 표시 내용 지정
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard isHomeViewCheck else { return UITableViewCell() }
+        
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: HomeContentTableViewCell.identifier,
+                                                       for: indexPath) as? HomeContentTableViewCell else {
+            return UITableViewCell()
+        }
+        
+        let shop = homeShopData[indexPath.row]
+        cell.configure(
+            shopImage: shop.imageName,
+            shopTitle: shop.title,
+            shopCategory: shop.category,
+            shopContent: shop.content,
+            shopFavorite: shop.isFavorite
+        )
+        return cell
     }
 }
