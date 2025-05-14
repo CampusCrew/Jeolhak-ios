@@ -7,6 +7,9 @@ target 'jeolhak' do
 
   # Naver Map API
   pod 'NMapsMap'
+  
+  # Alamofire
+  pod 'Alamofire'
 
   # Pods for jeolhak
 
