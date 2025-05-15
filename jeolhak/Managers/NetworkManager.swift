@@ -25,10 +25,12 @@ class NetworkManager {
     private init() {}
     
     // GET
-    func requestGET<T: Decodable>(urlString: String, completion: @escaping (Result<T, APIError>) -> Void) {
+    func requestGET<T: Decodable>(urlString: String, parameters: [String: Any]? = nil, completion: @escaping (Result<T, APIError>) -> Void) {
         
         // Alamofire - GET
-        AF.request(urlString, method: .get).validate().responseDecodable(of: T.self) { response in
+        AF.request(urlString, method: .get, parameters: parameters)
+            .validate()
+            .responseDecodable(of: T.self) { response in
             self.handleResponse(response, completion: completion)
         }
     }

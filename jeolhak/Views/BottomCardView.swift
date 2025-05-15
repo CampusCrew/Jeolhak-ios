@@ -66,7 +66,7 @@ class BottomCardView: UIView {
             backgroundView.bottomAnchor.constraint(equalTo: parentView.bottomAnchor)
         ])
     }
-    
+
     /** 카드 뷰 설정 함수 */
     private func setupBottomCardView() {
         backgroundColor = .white

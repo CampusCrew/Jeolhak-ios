@@ -57,8 +57,26 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
             mapContainerView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         
+        // 지도 출력
         MapManager.shared.setMapView(mapContainerView.customMapView.mapView)
+        
+        // 통신 진행
+        NetworkManager.shared.requestGET(
+            urlString: "\(APIConstants.baseURL)/stores",
+            parameters: ["lat": 35.960804, "lng": 126.957785]
+        ) { (result: Result<[StoreResponse], APIError>) in
+            switch result {
+            case .success(let stores):
+                print("받은 가게 목록:", stores)
+            case .failure(let error):
+                print("에러:", error)
+            }
+        }
+        
+        // 검색바 출력
         setupSearchBar()
+        
+        // 하단 카드뷰 출력
         bottomCardView = BottomCardView(parentView: self.view, height: 120, isHomeViewCheck: true)
     }
     
