@@ -61,23 +61,35 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         MapManager.shared.setMapView(mapContainerView.customMapView.mapView)
         
         // 통신 진행
-        NetworkManager.shared.requestGET(
-            urlString: "\(APIConstants.baseURL)/stores",
-            parameters: ["lat": 35.960804, "lng": 126.957785]
-        ) { (result: Result<[StoreResponse], APIError>) in
-            switch result {
-            case .success(let stores):
-                print("받은 가게 목록:", stores)
-            case .failure(let error):
-                print("에러:", error)
-            }
-        }
-        
+        fetchStores(latitude : 35.960804, longitude: 126.957785)
+
         // 검색바 출력
         setupSearchBar()
         
         // 하단 카드뷰 출력
         bottomCardView = BottomCardView(parentView: self.view, height: 120, isHomeViewCheck: true)
+    }
+    
+    /** 사용자 위치 근방 할인 가게 호출 */
+    private func fetchStores(latitude: Double, longitude: Double){
+        let parameters: [String: Any] = [
+            "lat": latitude,
+            "lng": longitude
+        ]
+        
+        NetworkManager.shared.requestGET(urlString: APIConstants.getStores, parameters: parameters) {
+            (result: Result<StoreResponse, APIError>) in
+            switch result{
+            case .success(let storeResponse):
+                print("받아온 가게의 수 : ", storeResponse.data.count)
+                for store in storeResponse.data {
+                    print("* \(store.name): (\(store.lat), \(store.lng))")
+                }
+            case .failure(let error):
+                print("오류 발생", error)
+                print(APIConstants.getStores)
+            }
+        }
     }
     
     /** 검색창 설정  */

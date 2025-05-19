@@ -22,6 +22,13 @@ struct Store: Decodable {
     
     /// 가게 경도 (longitude)
     let lng: Double
+    
+    /// 서버의 응답 매핑 (ex : Server -> latitude, Swift -> lat. 이걸 일치하게)
+    enum CodingKeys: String, CodingKey {
+        case name
+        case lat = "latitude"
+        case lng = "longitude"
+    }
 }
 
 /// 가게 목록 조회 API의 전체 응답 모델

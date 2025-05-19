@@ -48,6 +48,20 @@ class NetworkManager {
     
     // MARK: - Response 핸들러
     private func handleResponse<T: Decodable>(_ response: AFDataResponse<T>, completion: @escaping (Result<T, APIError>) -> Void) {
+    
+        if let url = response.request?.url {
+            print("🌐 요청 URL: \(url)")
+        }
+        if let statusCode = response.response?.statusCode {
+            print("📶 응답 코드: \(statusCode)")
+        }
+        if let data = response.data, let body = String(data: data, encoding: .utf8) {
+            print("📦 응답 내용: \(body)")
+        }
+        if let error = response.error {
+            print("❌ Alamofire 오류: \(error.localizedDescription)")
+        }
+        
         switch response.result {
         case .success(let value):
             completion(.success(value))

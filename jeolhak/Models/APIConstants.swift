@@ -7,6 +7,9 @@
 
 import Foundation
 
-struct APIConstants {
-    static let baseURL = "https://ec2-43-201-94-46.ap-northeast-2.compute.amazonaws.com"
+enum APIConstants {
+    static let baseURL = "http://ec2-43-201-94-46.ap-northeast-2.compute.amazonaws.com:8080"
+    
+    // GET /stores
+    static let getStores = baseURL + "/stores"
 }
