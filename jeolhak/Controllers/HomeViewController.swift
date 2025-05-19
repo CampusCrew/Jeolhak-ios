@@ -61,7 +61,7 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         MapManager.shared.setMapView(mapContainerView.customMapView.mapView)
         
         // 통신 진행
-        fetchStores(latitude : 35.960804, longitude: 126.957785)
+        fetchStores(latitude : 35.960804, longitude: 126.957785, mapContainerView)
 
         // 검색바 출력
         setupSearchBar()
@@ -71,7 +71,7 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
     }
     
     /** 사용자 위치 근방 할인 가게 호출 */
-    private func fetchStores(latitude: Double, longitude: Double){
+    private func fetchStores(latitude: Double, longitude: Double, _ mapContainerView: CustomMapView){
         let parameters: [String: Any] = [
             "lat": latitude,
             "lng": longitude
@@ -82,6 +82,7 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
             switch result{
             case .success(let storeResponse):
                 print("받아온 가게의 수 : ", storeResponse.data.count)
+                self.displaySetMarker(storeResponse.data, mapContainerView)
                 for store in storeResponse.data {
                     print("* \(store.name): (\(store.lat), \(store.lng))")
                 }
@@ -89,6 +90,16 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
                 print("오류 발생", error)
                 print(APIConstants.getStores)
             }
+        }
+    }
+    
+    /** 현재 위치 기준 마커 요청 */
+    private func displaySetMarker(_ stores: [Store], _ mapContainerView: CustomMapView){
+        for store in stores {
+            let marker = NMFMarker()
+            marker.position = NMGLatLng(lat: store.lat, lng: store.lng)
+            marker.captionText = store.name
+            marker.mapView = mapContainerView.customMapView.mapView
         }
     }
     
