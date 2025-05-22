@@ -55,6 +55,7 @@ class NetworkManager {
             if let statusCode = response.response?.statusCode, !(200...299).contains(statusCode) {
                 completion(.failure(.invalidResponse))
             } else {
+                print(response.response)
                 completion(.failure(.requestFailed))
             }
         }

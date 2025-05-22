@@ -26,6 +26,9 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
     // 마커 클러스터
     private var clusterer : NMCClusterer<StoreKey>?
     
+    // 사용자 데이터
+    private var department: String = ""
+    private var major: String = ""
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -47,6 +50,12 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
     // 뷰 최초 실행 사이클
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        department = UserDefaults.standard.string(forKey: "department") ?? "없음"
+        major = UserDefaults.standard.string(forKey: "major") ?? "없음"
+        
+        print("사용자 단과대 : ", department)
+        print("사용자 학과 : ", major)
         
         // 지도 초기화
         mapContainerView = CustomMapView()
@@ -74,11 +83,41 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
     }
     
     /** 사용자 위치 근방 할인 가게 호출 */
-    private func fetchStores(latitude: Double, longitude: Double, _ mapContainerView: CustomMapView){
+    private func fetchStores(latitude: Double,
+                             longitude: Double,
+                             _ department: String?,
+                             _ major: String?,
+                             _ mapContainerView: CustomMapView){
+        // 쿼리 스트링용 단과대학 변수
+        let payloadDepartment: String
+        // 쿼리 스트링용 학과 변수
+        let payloadMajor: String
+        
+        if let dept = department, let maj = major {
+                if dept == "''" && maj == "''" {
+                    payloadDepartment = "''"
+                    payloadMajor = "''"
+                } else {
+                    payloadDepartment = dept
+                    payloadMajor = maj
+                }
+            } else if let dept = department {
+                payloadDepartment = dept
+                payloadMajor = ""
+            } else if let maj = major {
+                payloadDepartment = ""
+                payloadMajor = maj
+            } else {
+                payloadDepartment = "''"
+                payloadMajor = "''"
+            }
+        
         let parameters: [String: Any] = [
-            "lat": latitude,
-            "lng": longitude
-        ]
+                "lat": latitude,
+                "lng": longitude,
+                "department": payloadDepartment,
+                "major": payloadMajor
+            ]
         
         NetworkManager.shared.requestGET(urlString: APIConstants.getStores, parameters: parameters) {
             (result: Result<StoreResponse, APIError>) in
@@ -123,8 +162,12 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         MapManager.shared.onLocationUpdate = { [weak self] coordinate in
             guard let self = self else { return }
             // 학교에서 작업하고 있으므로 임의적으로 다사랑으로 지정
-//            self.fetchStores(latitude: 35.960804, longitude: 126.957785, mapContainerView)
-            self.fetchStores(latitude: coordinate.latitude, longitude: coordinate.longitude, mapContainerView)
+            self.fetchStores(latitude: 35.960804, longitude: 126.957785,department,major, mapContainerView)
+//            self.fetchStores(latitude: coordinate.latitude,
+//                             longitude: coordinate.longitude,
+//                             department,
+//                             major,
+//                             mapContainerView)
         }
         
         // 위치 호출 실패 시 익산 신동 다사랑 좌표 사용
@@ -134,6 +177,8 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
                 let fallbackLng = 126.957785
                 self.fetchStores(latitude: fallbackLat,
                                  longitude: fallbackLng,
+                                 department,
+                                 major,
                                  mapContainerView)
             }
     }

@@ -127,11 +127,16 @@ class UserInfoViewController: UIViewController, UIPickerViewDelegate, UIPickerVi
     // MARK: - 다음 버튼 액션
     @objc private func nextTapped() {
         let selectedDept = departments[selectedDepartmentIndex].departmentName
-        let major = selectedMajor.isEmpty ? departments[selectedDepartmentIndex].majors[0] : selectedMajor
+        let selectedMaj = selectedMajor.isEmpty ? departments[selectedDepartmentIndex].majors[0] : selectedMajor
+        
+        // "전체" 키워드 문자열 판별
+        let finalDept = selectedDept.contains("전체") ? "" : selectedDept
+        let finalMaj = selectedDept.contains("전체") ? "" : selectedMaj
+        
         
         UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
         UserDefaults.standard.set(selectedDept, forKey: "department")
-        UserDefaults.standard.set(major, forKey: "major")
+        UserDefaults.standard.set(selectedMaj, forKey: "major")
         
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first {

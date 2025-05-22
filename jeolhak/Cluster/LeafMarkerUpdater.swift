@@ -14,7 +14,7 @@ class LeafMarkerUpdater: NMCDefaultLeafMarkerUpdater {
         super.updateLeafMarker(info, marker)
         guard let key = info.key as? StoreKey else { return }
         
-        let categoryName = stores[key.identifier].name
+        let categoryName = stores[key.identifier].category ?? "기타" // 옵셔널 바인딩 대체
         let markerType = MarkerCategory.from(categoryName: categoryName)
         
         marker.iconImage = NMFOverlayImage(image: UIImage(named: markerType.imageName)!)
