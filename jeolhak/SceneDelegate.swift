@@ -20,7 +20,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
         let window = UIWindow(windowScene: windowScene)
-        window.rootViewController = SplashViewController() // ✅ 첫 화면을 Splash로!
+        window.rootViewController = SplashViewController() 
         self.window = window
         window.makeKeyAndVisible()
     }

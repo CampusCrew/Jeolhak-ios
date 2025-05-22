@@ -12,7 +12,9 @@ class CustomMapView: UIView {
     let customMapView: NMFNaverMapView = {
         let view = NMFNaverMapView(frame: .zero)
         view.translatesAutoresizingMaskIntoConstraints = false
+        
         view.mapView.mapType = .basic
+        // view.mapView.setLayerGroup(NMF_LAYER_GROUP_BUILDING, isEnabled: false)
         view.showLocationButton = true
         view.showScaleBar = true
         view.mapView.positionMode = .direction

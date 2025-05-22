@@ -9,10 +9,10 @@ import UIKit
 
 class SplashViewController: UIViewController {
     private var logoImageView: UIImageView!
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         view.backgroundColor = .white
         
         // 로고
@@ -22,10 +22,38 @@ class SplashViewController: UIViewController {
         setupLabel()
         
         // 설정된 시간 후 메인화면 전환
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5){
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            self.routeBasedOnLaunchStatus()
+        }
+    }
+    
+    private func routeBasedOnLaunchStatus() {
+        let isFirstLaunch = !UserDefaults.standard.bool(forKey: "hasLaunchedBefore")
+        
+        if isFirstLaunch {
+            let userInfoVC = UserInfoViewController()
+            userInfoVC.modalPresentationStyle = .fullScreen
+            self.present(userInfoVC, animated: true)
+        } else {
             self.switchToMainTabBar()
         }
     }
+    
+    private func switchToMainTabBar() {
+        let mainTabBarController = MainTabBarController()
+        
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first {
+            UIView.transition(with: window,
+                              duration: 0.3,
+                              options: .transitionCrossDissolve,
+                              animations: {
+                window.rootViewController = mainTabBarController
+            }, completion: nil)
+        }
+    }
+    
+    
     // 로고 설정
     private func setupLogo(){
         logoImageView = UIImageView(image: UIImage(named: "SplashLogo"))
@@ -58,27 +86,4 @@ class SplashViewController: UIViewController {
         ])
         
     }
-    
-    // 라벨 설정
-    
-    // 메인화면 전환 함수
-    private func switchToMainTabBar() {
-        let mainTabBarController = MainTabBarController()
-        
-        // rootViewController 교체
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first {
-            // 애니메이션
-            // 애니메이션 효과 (선택)
-                        UIView.transition(with: window,
-                                          duration: 0.3,
-                                          options: .transitionCrossDissolve,
-                                          animations: {
-                                              window.rootViewController = mainTabBarController
-                                          },
-                                          completion: nil)
-        }
-    }
-
-
 }

@@ -23,6 +23,9 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
     // 지도 뷰
     private var mapContainerView: CustomMapView!
     
+    // 마커 클러스터
+    private var clusterer : NMCClusterer<StoreKey>?
+    
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -57,12 +60,12 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
             mapContainerView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         
+        // 위치 콜백
+        setLocationCallback()
+   
         // 지도 출력
         MapManager.shared.setMapView(mapContainerView.customMapView.mapView)
         
-        // 통신 진행
-        fetchStores(latitude : 35.960804, longitude: 126.957785, mapContainerView)
-
         // 검색바 출력
         setupSearchBar()
         
@@ -83,9 +86,6 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
             case .success(let storeResponse):
                 print("받아온 가게의 수 : ", storeResponse.data.count)
                 self.displaySetMarker(storeResponse.data, mapContainerView)
-                for store in storeResponse.data {
-                    print("* \(store.name): (\(store.lat), \(store.lng))")
-                }
             case .failure(let error):
                 print("오류 발생", error)
                 print(APIConstants.getStores)
@@ -94,13 +94,48 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
     }
     
     /** 현재 위치 기준 마커 요청 */
-    private func displaySetMarker(_ stores: [Store], _ mapContainerView: CustomMapView){
-        for store in stores {
-            let marker = NMFMarker()
-            marker.position = NMGLatLng(lat: store.lat, lng: store.lng)
-            marker.captionText = store.name
-            marker.mapView = mapContainerView.customMapView.mapView
+    private func displaySetMarker(_ stores: [Store], _ mapContainerView: CustomMapView) {
+        let builder = NMCBuilder<StoreKey>()
+        builder.minZoom = 9
+        builder.maxZoom = 16
+        // builder.animate = false
+
+        let leafMarkerUpdater = LeafMarkerUpdater()
+        leafMarkerUpdater.stores = stores
+        builder.leafMarkerUpdater = leafMarkerUpdater
+
+        clusterer = builder.build()
+        clusterer?.mapView = mapContainerView.customMapView.mapView
+
+        var keyTagMap: [StoreKey: NSNull] = [:]
+        for (index, store) in stores.enumerated() {
+            let key = StoreKey(identifier: index, position: NMGLatLng(lat: store.lat, lng: store.lng))
+            keyTagMap[key] = NSNull()
         }
+
+        clusterer?.clear()
+        clusterer?.addAll(keyTagMap)
+    }
+    
+    // 위치 콜백 정의
+    private func setLocationCallback() {
+        // 위치 호출 콜백
+        MapManager.shared.onLocationUpdate = { [weak self] coordinate in
+            guard let self = self else { return }
+            // 학교에서 작업하고 있으므로 임의적으로 다사랑으로 지정
+//            self.fetchStores(latitude: 35.960804, longitude: 126.957785, mapContainerView)
+            self.fetchStores(latitude: coordinate.latitude, longitude: coordinate.longitude, mapContainerView)
+        }
+        
+        // 위치 호출 실패 시 익산 신동 다사랑 좌표 사용
+        MapManager.shared.onLocationUpdateFail = { [weak self] in
+                guard let self = self else { return }
+                let fallbackLat = 35.960804
+                let fallbackLng = 126.957785
+                self.fetchStores(latitude: fallbackLat,
+                                 longitude: fallbackLng,
+                                 mapContainerView)
+            }
     }
     
     /** 검색창 설정  */
