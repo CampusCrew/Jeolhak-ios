@@ -30,6 +30,10 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
     private var department: String = ""
     private var major: String = ""
     
+    // 사용자 데이터 표시
+    private var departmentView: HomeSelectedUserInfoView!
+    private var majorView: HomeSelectedUserInfoView!
+    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         // 카드 최대 높이가 초기값일 때만 실행
@@ -83,8 +87,8 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         // 지도 출력
         MapManager.shared.setMapView(mapContainerView.customMapView.mapView)
         
-        // 검색바 출력
-        setupSearchBar()
+        // 검색, 단과/학과 정보 출력
+        setupSearchBarAndUserInfo()
         
         // 하단 카드뷰 출력
         bottomCardView = BottomCardView(parentView: self.view, height: 120, isHomeViewCheck: true)
@@ -96,6 +100,10 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         
         print("변경된 단과대학 : ", department)
         print("변경된 학과 : ", major)
+        
+        // View 업데이트
+        departmentView.update(content: department)
+        majorView.update(content: major)
         
         // 현재 위치 기반 API 요청 다시 진행 (변경된 단과, 학과 정보)
         if let currentLocation = MapManager.shared.currentLocation {
@@ -124,7 +132,6 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
-    
     
     /** 사용자 위치 근방 할인 가게 호출 */
     private func fetchStores(latitude: Double,
@@ -235,15 +242,41 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         }
     }
     
-    /** 검색창 설정  */
-    private func setupSearchBar() {
+    // 선택된 단과대학, 학과 표시
+    private func setupSearchBarAndUserInfo() {
+        let infoStackView = UIView()
+        infoStackView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(infoStackView)
+        
+        departmentView = HomeSelectedUserInfoView(content: department)
+        departmentView.translatesAutoresizingMaskIntoConstraints = false
+        infoStackView.addSubview(departmentView)
+        
+        majorView = HomeSelectedUserInfoView(content: major)
+        majorView.translatesAutoresizingMaskIntoConstraints = false
+        infoStackView.addSubview(majorView)
+        
         let searchBarView = HomeSearchBarView()
         self.searchBarContainer = searchBarView
         searchBarView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(searchBarView)
         
         NSLayoutConstraint.activate([
-            searchBarView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
+            infoStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -10),
+            infoStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            
+            // departmentView (왼쪽)
+            departmentView.topAnchor.constraint(equalTo: infoStackView.topAnchor),
+            departmentView.bottomAnchor.constraint(equalTo: infoStackView.bottomAnchor),
+            departmentView.leadingAnchor.constraint(equalTo: infoStackView.leadingAnchor),
+            
+            // majorView (오른쪽)
+            majorView.topAnchor.constraint(equalTo: infoStackView.topAnchor),
+            majorView.bottomAnchor.constraint(equalTo: infoStackView.bottomAnchor),
+            majorView.leadingAnchor.constraint(equalTo: departmentView.trailingAnchor, constant: 20),
+            majorView.trailingAnchor.constraint(equalTo: infoStackView.trailingAnchor),
+            
+            searchBarView.topAnchor.constraint(equalTo: infoStackView.bottomAnchor, constant: 10),
             searchBarView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40),
             searchBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40),
             searchBarView.heightAnchor.constraint(equalToConstant: 50)
