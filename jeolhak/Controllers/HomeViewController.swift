@@ -51,7 +51,7 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // 단과대학, 학과 변경 감지
+        // 단과대학, 학과 변경
         NotificationCenter.default.addObserver(
                     self,
                     selector: #selector(refreshAfterChange),
@@ -93,9 +93,6 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
     @objc private func refreshAfterChange() {
         department = UserDefaults.standard.string(forKey: "department") ?? "없음"
         major = UserDefaults.standard.string(forKey: "major") ?? "없음"
-        
-        print("사용자 단과대 : ", department)
-        print("사용자 학과 : ", major)
             
     }
     

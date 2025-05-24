@@ -12,6 +12,7 @@ class HomeSearchBarView: UIView {
     let textField = UITextField()
     let menuButton = UIButton()
     let searchButton = UIButton()
+    let dividerView = UIView() // 구분선
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -24,9 +25,6 @@ class HomeSearchBarView: UIView {
     }
     
     private func setupView() {
-        setupTextField()
-        setupButtons()
-        
         backgroundColor = .white
         layer.cornerRadius = 20
         layer.masksToBounds = false
@@ -35,8 +33,13 @@ class HomeSearchBarView: UIView {
         layer.shadowOffset = CGSize(width: 1, height: 3)
         layer.shadowRadius = 6
         
-        addSubview(textField)
+        setupTextField()
+        setupButtons()
+        setupDivider() // 구분선
+        
         addSubview(menuButton)
+        addSubview(dividerView)
+        addSubview(textField)
         addSubview(searchButton)
         
         NSLayoutConstraint.activate([
@@ -45,12 +48,17 @@ class HomeSearchBarView: UIView {
             menuButton.widthAnchor.constraint(equalToConstant: 30),
             menuButton.heightAnchor.constraint(equalToConstant: 30),
             
+            dividerView.leadingAnchor.constraint(equalTo: menuButton.trailingAnchor, constant: 5),
+            dividerView.centerYAnchor.constraint(equalTo: menuButton.centerYAnchor),
+            dividerView.widthAnchor.constraint(equalToConstant: 1),
+            dividerView.heightAnchor.constraint(equalTo: menuButton.heightAnchor, multiplier: 0.7),
+            
             searchButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -15),
             searchButton.centerYAnchor.constraint(equalTo: centerYAnchor),
             searchButton.widthAnchor.constraint(equalToConstant: 30),
             searchButton.heightAnchor.constraint(equalToConstant: 30),
             
-            textField.leadingAnchor.constraint(equalTo: menuButton.trailingAnchor, constant: 5),
+            textField.leadingAnchor.constraint(equalTo: dividerView.trailingAnchor, constant: 10),
             textField.trailingAnchor.constraint(equalTo: searchButton.leadingAnchor, constant: -5),
             textField.centerYAnchor.constraint(equalTo: centerYAnchor)
         ])
@@ -72,8 +80,13 @@ class HomeSearchBarView: UIView {
         )
     }
     
+    private func setupDivider() {
+        dividerView.backgroundColor = .lightGray
+        dividerView.translatesAutoresizingMaskIntoConstraints = false
+    }
+    
     private func setupButtons() {
-        menuButton.setImage(UIImage(systemName: "storefront"), for: .normal)
+        menuButton.setImage(UIImage(systemName: "graduationcap"), for: .normal)
         menuButton.tintColor = .mainPink
         
         // 단과대학, 학과 수정 이벤트 액션
@@ -93,11 +106,11 @@ class HomeSearchBarView: UIView {
         } else {
             let userInfoVC = UserInfoViewController()
             userInfoVC.entryMode = .changeSettings
-
+            
             let triggerVC = DismissTriggerViewController(modal: userInfoVC)
             triggerVC.modalPresentationStyle = .overFullScreen
             triggerVC.modalTransitionStyle = .crossDissolve
-
+            
             parentViewController?.present(triggerVC, animated: false)
         }
     }
