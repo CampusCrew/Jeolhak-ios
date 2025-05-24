@@ -33,8 +33,9 @@ class UserInfoViewController: UIViewController, UIPickerViewDelegate, UIPickerVi
         setupLabel()
         setupPicker()
         setupButton()
+        restoreDepartments() // 기존 저장사항 불러오기
         
-        
+        // 수정 모드일 때
         if entryMode == .changeSettings {
             preferredContentSize = CGSize(width: 360, height: 420)
             
@@ -142,6 +143,31 @@ class UserInfoViewController: UIViewController, UIPickerViewDelegate, UIPickerVi
         : departments[selectedDepartmentIndex].majors[row]
         
         return label
+    }
+    
+    // 사용자 선택 사항 불러오기
+    private func restoreDepartments() {
+        let savedDepartment = UserDefaults.standard.string(forKey: "department") ?? ""
+        let savedMajor = UserDefaults.standard.string(forKey: "major") ?? ""
+
+        // 단과대학 인덱스 찾기
+        if let deptIndex = departments.firstIndex(where: { $0.departmentName == savedDepartment }) {
+            selectedDepartmentIndex = deptIndex
+
+            // 학과 인덱스 찾기
+            if let majorIndex = departments[deptIndex].majors.firstIndex(of: savedMajor) {
+                selectedMajor = savedMajor
+                pickerView.reloadComponent(1)
+                pickerView.selectRow(deptIndex, inComponent: 0, animated: false)
+                pickerView.selectRow(majorIndex, inComponent: 1, animated: false)
+            } else {
+                // 학과가 없을 경우 첫 번째 선택
+                selectedMajor = departments[deptIndex].majors[0]
+                pickerView.reloadComponent(1)
+                pickerView.selectRow(deptIndex, inComponent: 0, animated: false)
+                pickerView.selectRow(0, inComponent: 1, animated: false)
+            }
+        }
     }
     
     // MARK: - 다음 버튼 액션
