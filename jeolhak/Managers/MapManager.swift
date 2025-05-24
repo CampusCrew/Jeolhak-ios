@@ -12,27 +12,30 @@ import CoreLocation
 import NMapsMap
 
 class MapManager: NSObject, CLLocationManagerDelegate {
+    
     static let shared = MapManager()
     
     private let locationManager = CLLocationManager()
     private var mapView: NMFMapView? = nil
+    
+    // 현재 위치 저장
+    var currentLocation: CLLocationCoordinate2D? = nil
 
-    // 위치 업데이트 중복 방지 플래그
+    // 중복 요청 방지
     private var hasRequestedLocation = false
     
     // 위치 업데이트 콜백
     var onLocationUpdate: ((CLLocationCoordinate2D) -> Void)?
-    
-    // 위치 업데이트 실패 시 fallback 콜백
     var onLocationUpdateFail: (() -> Void)?
-
+    
     private override init() {
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.requestWhenInUseAuthorization()
     }
-
+    
+    // 네이버 맵 연결 시 최초 1회 위치 요청
     func setMapView(_ mapView: NMFMapView) {
         self.mapView = mapView
         
@@ -42,9 +45,18 @@ class MapManager: NSObject, CLLocationManagerDelegate {
         }
     }
 
+    // 수동으로 현재 위치 요청
+    func requestCurrentLocation() {
+        locationManager.startUpdatingLocation()
+    }
+
+    // MARK: - CLLocationManagerDelegate
+    
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.first else { return }
         let coordinate = location.coordinate
+        currentLocation = coordinate // 위치 저장
+        
         let latLng = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
         
         // 지도 이동
@@ -59,7 +71,7 @@ class MapManager: NSObject, CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: any Error) {
-        print("위치 정보 흭득 실패 : \(error.localizedDescription)")
+        print("위치 정보 흭득 실패: \(error.localizedDescription)")
         onLocationUpdateFail?()
     }
 }

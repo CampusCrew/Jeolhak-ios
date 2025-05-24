@@ -53,10 +53,10 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         
         // 단과대학, 학과 변경
         NotificationCenter.default.addObserver(
-                    self,
-                    selector: #selector(refreshAfterChange),
-                    name: .didUpdateUserSelection,
-                    object: nil
+            self,
+            selector: #selector(refreshAfterChange),
+            name: .didUpdateUserSelection,
+            object: nil
         )
         
         department = UserDefaults.standard.string(forKey: "department") ?? "없음"
@@ -79,7 +79,7 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         
         // 위치 콜백
         setLocationCallback()
-   
+        
         // 지도 출력
         MapManager.shared.setMapView(mapContainerView.customMapView.mapView)
         
@@ -93,13 +93,38 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
     @objc private func refreshAfterChange() {
         department = UserDefaults.standard.string(forKey: "department") ?? "없음"
         major = UserDefaults.standard.string(forKey: "major") ?? "없음"
-            
+        
+        print("변경된 단과대학 : ", department)
+        print("변경된 학과 : ", major)
+        
+        // 현재 위치 기반 API 요청 다시 진행 (변경된 단과, 학과 정보)
+        if let currentLocation = MapManager.shared.currentLocation {
+            print("현재 위치 기반 단과, 학과 업데이트")
+            fetchStores(latitude: 35.960804, // 테스트로 다사랑에서 확인하기
+                        longitude: 126.957785,
+                        department,
+                        major,
+                        mapContainerView)
+            //            fetchStores(latitude: currentLocation.latitude,
+            //                        longitude: currentLocation.longitude,
+            //                        department,
+            //                        major,
+            //                        mapContainerView)
+        } else {
+            print("현재 위치 불러오기 실패. 다사랑 기준 단과, 학과 업데이트")
+            fetchStores(latitude: 35.960804,
+                        longitude: 126.957785,
+                        department,
+                        major,
+                        mapContainerView)
+        }
+        
     }
     
     deinit {
-            NotificationCenter.default.removeObserver(self)
-        }
-        
+        NotificationCenter.default.removeObserver(self)
+    }
+    
     
     /** 사용자 위치 근방 할인 가게 호출 */
     private func fetchStores(latitude: Double,
@@ -113,30 +138,30 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         let payloadMajor: String
         
         if let dept = department, let maj = major {
-                if dept == "''" && maj == "''" {
-                    payloadDepartment = "''"
-                    payloadMajor = "''"
-                } else {
-                    payloadDepartment = dept
-                    payloadMajor = maj
-                }
-            } else if let dept = department {
-                payloadDepartment = dept
-                payloadMajor = ""
-            } else if let maj = major {
-                payloadDepartment = ""
-                payloadMajor = maj
-            } else {
+            if dept == "''" && maj == "''" {
                 payloadDepartment = "''"
                 payloadMajor = "''"
+            } else {
+                payloadDepartment = dept
+                payloadMajor = maj
             }
+        } else if let dept = department {
+            payloadDepartment = dept
+            payloadMajor = ""
+        } else if let maj = major {
+            payloadDepartment = ""
+            payloadMajor = maj
+        } else {
+            payloadDepartment = "''"
+            payloadMajor = "''"
+        }
         
         let parameters: [String: Any] = [
-                "lat": latitude,
-                "lng": longitude,
-                "department": payloadDepartment,
-                "major": payloadMajor
-            ]
+            "lat": latitude,
+            "lng": longitude,
+            "department": payloadDepartment,
+            "major": payloadMajor
+        ]
         
         NetworkManager.shared.requestGET(urlString: APIConstants.getStores, parameters: parameters) {
             (result: Result<StoreResponse, APIError>) in
@@ -155,51 +180,59 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
     private func displaySetMarker(_ stores: [Store], _ mapContainerView: CustomMapView) {
         let builder = NMCBuilder<StoreKey>()
         builder.minZoom = 9
-        builder.maxZoom = 16
+        builder.maxZoom = 14
         // builder.animate = false
-
+        
         let leafMarkerUpdater = LeafMarkerUpdater()
         leafMarkerUpdater.stores = stores
         builder.leafMarkerUpdater = leafMarkerUpdater
-
-        clusterer = builder.build()
-        clusterer?.mapView = mapContainerView.customMapView.mapView
-
+        
+        // 새로운 클러스터 생성
+        let newClusterer = builder.build()
+        newClusterer.mapView = mapContainerView.customMapView.mapView
+        
+        // 기존 클러스터 제거
+        clusterer?.clear()
+        clusterer = newClusterer
+        
         var keyTagMap: [StoreKey: NSNull] = [:]
         for (index, store) in stores.enumerated() {
             let key = StoreKey(identifier: index, position: NMGLatLng(lat: store.lat, lng: store.lng))
             keyTagMap[key] = NSNull()
         }
-
-        clusterer?.clear()
+        
         clusterer?.addAll(keyTagMap)
     }
     
-    // 위치 콜백 정의
+    // 위치 콜백 정의 (현재 위치 기반, 모달 모드가 init일 때 실행)
     private func setLocationCallback() {
         // 위치 호출 콜백
         MapManager.shared.onLocationUpdate = { [weak self] coordinate in
             guard let self = self else { return }
             // 학교에서 작업하고 있으므로 임의적으로 다사랑으로 지정
-            self.fetchStores(latitude: 35.960804, longitude: 126.957785,department,major, mapContainerView)
-//            self.fetchStores(latitude: coordinate.latitude,
-//                             longitude: coordinate.longitude,
-//                             department,
-//                             major,
-//                             mapContainerView)
+            self.fetchStores(latitude: 35.960804,
+                             longitude: 126.957785,
+                             department,
+                             major,
+                             mapContainerView)
+            //            self.fetchStores(latitude: coordinate.latitude,
+            //                             longitude: coordinate.longitude,
+            //                             department,
+            //                             major,
+            //                             mapContainerView)
         }
         
         // 위치 호출 실패 시 익산 신동 다사랑 좌표 사용
         MapManager.shared.onLocationUpdateFail = { [weak self] in
-                guard let self = self else { return }
-                let fallbackLat = 35.960804
-                let fallbackLng = 126.957785
-                self.fetchStores(latitude: fallbackLat,
-                                 longitude: fallbackLng,
-                                 department,
-                                 major,
-                                 mapContainerView)
-            }
+            guard let self = self else { return }
+            let fallbackLat = 35.960804
+            let fallbackLng = 126.957785
+            self.fetchStores(latitude: fallbackLat,
+                             longitude: fallbackLng,
+                             department,
+                             major,
+                             mapContainerView)
+        }
     }
     
     /** 검색창 설정  */
@@ -208,7 +241,7 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         self.searchBarContainer = searchBarView
         searchBarView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(searchBarView)
-
+        
         NSLayoutConstraint.activate([
             searchBarView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
             searchBarView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40),
