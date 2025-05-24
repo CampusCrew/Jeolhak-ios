@@ -7,11 +7,19 @@
 
 import UIKit
 
+// 진입 방식 플래그
+enum UserInfoEntryMode{
+    case initialLaunch // 최초 실행
+    case changeSettings // 설정 변경
+}
+
 class UserInfoViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
     
     private let titleLabel = UILabel()
     private let pickerView = UIPickerView()
     private let nextButton = UIButton()
+    
+    var entryMode: UserInfoEntryMode = .initialLaunch
     
     // MARK: - DepartmentModal 불러오기
     private let departments: [Department] = allDepartments
@@ -26,10 +34,19 @@ class UserInfoViewController: UIViewController, UIPickerViewDelegate, UIPickerVi
         setupPicker()
         setupButton()
         
-        //        print("Departments loaded: \(departments.count)")
-        //            if let first = departments.first {
-        //                print("First department: \(first.departmentName), Majors: \(first.majors.count)")
-        //            }
+        
+        if entryMode == .changeSettings {
+            preferredContentSize = CGSize(width: 360, height: 420)
+            
+            if let sheet = sheetPresentationController {
+                sheet.detents = [.medium()]
+                sheet.prefersGrabberVisible = true
+                sheet.largestUndimmedDetentIdentifier = .medium
+                sheet.prefersEdgeAttachedInCompactHeight = true
+            }
+            
+            modalPresentationStyle = .formSheet
+        }
     }
     
     // MARK: - UI 구성
@@ -43,8 +60,10 @@ class UserInfoViewController: UIViewController, UIPickerViewDelegate, UIPickerVi
         
         NSLayoutConstraint.activate([
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 200)
-        ])
+            entryMode == .initialLaunch
+            ? titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 200)
+            : titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 60)
+        ].compactMap { $0 })
     }
     
     private func setupPicker() {
@@ -78,7 +97,8 @@ class UserInfoViewController: UIViewController, UIPickerViewDelegate, UIPickerVi
         
         NSLayoutConstraint.activate([
             nextButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            nextButton.topAnchor.constraint(equalTo: pickerView.bottomAnchor, constant: 40),
+            nextButton.topAnchor.constraint(equalTo: pickerView.bottomAnchor,
+                                            constant: entryMode == .initialLaunch ? 40 : -10),
             nextButton.widthAnchor.constraint(equalToConstant: 200),
             nextButton.heightAnchor.constraint(equalToConstant: 50)
         ])
@@ -116,10 +136,10 @@ class UserInfoViewController: UIViewController, UIPickerViewDelegate, UIPickerVi
         label.textAlignment = .center
         label.textColor = .mainPink
         label.font = UIFont(name: "Jua-Regular", size: 16)
-
+        
         label.text = component == 0
-            ? departments[row].departmentName
-            : departments[selectedDepartmentIndex].majors[row]
+        ? departments[row].departmentName
+        : departments[selectedDepartmentIndex].majors[row]
         
         return label
     }
@@ -135,18 +155,40 @@ class UserInfoViewController: UIViewController, UIPickerViewDelegate, UIPickerVi
         
         
         UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
-        UserDefaults.standard.set(selectedDept, forKey: "department")
-        UserDefaults.standard.set(selectedMaj, forKey: "major")
+        UserDefaults.standard.set(finalDept, forKey: "department")
+        UserDefaults.standard.set(finalMaj, forKey: "major")
         
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first {
-            let mainTabBarController = MainTabBarController()
-            UIView.transition(with: window,
-                              duration: 0.3,
-                              options: .transitionCrossDissolve,
-                              animations: {
-                window.rootViewController = mainTabBarController
-            }, completion: nil)
+        switch entryMode {
+        case .initialLaunch:
+            // 최초 실행: 메인 탭바 컨트롤러로 전환
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                let mainTabBarController = MainTabBarController()
+                UIView.transition(with: window,
+                                  duration: 0.3,
+                                  options: .transitionCrossDissolve,
+                                  animations: {
+                    window.rootViewController = mainTabBarController
+                })
+            }
+            
+        case .changeSettings:
+            // 상위 View (DismissTriggerViewController)까지 dismiss
+            if let presentingVC = self.presentingViewController,
+               let rootPresenter = presentingVC.presentingViewController {
+                rootPresenter.dismiss(animated: true) {
+                    NotificationCenter.default.post(name: .didUpdateUserSelection, object: nil)
+                }
+            } else {
+                // fallback
+                self.dismiss(animated: true) {
+                    NotificationCenter.default.post(name: .didUpdateUserSelection, object: nil)
+                }
+            }
         }
     }
+}
+
+extension Notification.Name {
+    static let didUpdateUserSelection = Notification.Name("didUpdateUserSelection")
 }

@@ -32,6 +32,7 @@ class SplashViewController: UIViewController {
         
         if isFirstLaunch {
             let userInfoVC = UserInfoViewController()
+            userInfoVC.entryMode = .initialLaunch
             userInfoVC.modalPresentationStyle = .fullScreen
             self.present(userInfoVC, animated: true)
         } else {

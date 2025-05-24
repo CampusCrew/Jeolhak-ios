@@ -51,6 +51,14 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // 단과대학, 학과 변경 감지
+        NotificationCenter.default.addObserver(
+                    self,
+                    selector: #selector(refreshAfterChange),
+                    name: .didUpdateUserSelection,
+                    object: nil
+        )
+        
         department = UserDefaults.standard.string(forKey: "department") ?? "없음"
         major = UserDefaults.standard.string(forKey: "major") ?? "없음"
         
@@ -81,6 +89,20 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         // 하단 카드뷰 출력
         bottomCardView = BottomCardView(parentView: self.view, height: 120, isHomeViewCheck: true)
     }
+    
+    @objc private func refreshAfterChange() {
+        department = UserDefaults.standard.string(forKey: "department") ?? "없음"
+        major = UserDefaults.standard.string(forKey: "major") ?? "없음"
+        
+        print("사용자 단과대 : ", department)
+        print("사용자 학과 : ", major)
+            
+    }
+    
+    deinit {
+            NotificationCenter.default.removeObserver(self)
+        }
+        
     
     /** 사용자 위치 근방 할인 가게 호출 */
     private func fetchStores(latitude: Double,
@@ -185,114 +207,16 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
     
     /** 검색창 설정  */
     private func setupSearchBar() {
-        // 배경 컨테이너
-        let searchBarContainer = createSearchBarContainer()
-        searchBarContainer.translatesAutoresizingMaskIntoConstraints = false
-        self.searchBarContainer = searchBarContainer
-        view.addSubview(searchBarContainer)
-        
-        // 검색창 배경 Auty Layout
+        let searchBarView = HomeSearchBarView()
+        self.searchBarContainer = searchBarView
+        searchBarView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(searchBarView)
+
         NSLayoutConstraint.activate([
-            // 화면 상단 간격(safeArea 기준)
-            searchBarContainer.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
-            // 좌측 여백
-            searchBarContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40),
-            // 우측 여백
-            searchBarContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40),
-            // 세로 길이 고정
-            searchBarContainer.heightAnchor.constraint(equalToConstant: 50)
+            searchBarView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
+            searchBarView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40),
+            searchBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40),
+            searchBarView.heightAnchor.constraint(equalToConstant: 50)
         ])
-        
-        // TextField
-        let textField = createTextField()
-        searchBarContainer.addSubview(textField)
-        
-        // TextField Auto Layout
-        NSLayoutConstraint.activate([
-            // 메뉴 버튼 여백 설정 (좌측)
-            textField.leadingAnchor.constraint(equalTo: searchBarContainer.leadingAnchor, constant: 50),
-            // 검색 버튼과의 여백 설정 (우측)
-            textField.trailingAnchor.constraint(equalTo: searchBarContainer.trailingAnchor, constant: -50),
-            // View 세로 중앙 설정
-            textField.centerYAnchor.constraint(equalTo: searchBarContainer.centerYAnchor)
-        ])
-        
-        // Menu Button
-        let menuButton = createButton(imageName: "line.horizontal.3")
-        searchBarContainer.addSubview(menuButton)
-        
-        // Menu Button Auto Layout
-        NSLayoutConstraint.activate([
-            // 왼쪽 여백 설정
-            menuButton.leadingAnchor.constraint(equalTo: searchBarContainer.leadingAnchor, constant: 15),
-            // View 세로 중앙 설정
-            menuButton.centerYAnchor.constraint(equalTo: searchBarContainer.centerYAnchor),
-            // 버튼 크기 설정 30*30
-            menuButton.widthAnchor.constraint(equalToConstant: 30),
-            menuButton.heightAnchor.constraint(equalToConstant: 30)
-        ])
-        
-        // Search Button
-        let searchButton = createButton(imageName: "magnifyingglass")
-        searchBarContainer.addSubview(searchButton)
-        
-        // Search Button Auto Layout
-        NSLayoutConstraint.activate([
-            // 오른쪽 여백 설정
-            searchButton.trailingAnchor.constraint(equalTo: searchBarContainer.trailingAnchor, constant: -15),
-            // View 세로 중앙 정렬
-            searchButton.centerYAnchor.constraint(equalTo: searchBarContainer.centerYAnchor),
-            searchButton.widthAnchor.constraint(equalToConstant: 30),
-            // 버튼 크기 설정 30*30
-            searchButton.heightAnchor.constraint(equalToConstant: 30)
-        ])
-        
-        
-    }
-    
-    /**
-     UI 생성 함수 모음 : 검색창, 텍스트 필드, 버튼
-     */
-    /** 검색창 컨테이너 생성 */
-    private func createSearchBarContainer() -> UIView {
-        let searchBarContainer = UIView()
-        
-        // 배경, 모서리
-        searchBarContainer.backgroundColor = .white
-        searchBarContainer.layer.cornerRadius = 20
-        // 뷰가 부모 뷰 침범 허용 (그림자 효과를 위함)
-        searchBarContainer.layer.masksToBounds = false
-        
-        // 그림자
-        searchBarContainer.layer.shadowColor = UIColor.black.cgColor
-        searchBarContainer.layer.shadowOpacity = 0.2 // 0.0 ~ 1.0 사이 지정
-        searchBarContainer.layer.shadowOffset = CGSize(width: 1, height: 3)
-        searchBarContainer.layer.shadowRadius = 6 // 흐림 강도
-        
-        return searchBarContainer
-    }
-    
-    /** 텍스트 필드 생성 */
-    private func createTextField() -> UITextField {
-        let textField = UITextField()
-        
-        textField.placeholder = "장소명"
-        textField.textColor = .black
-        textField.font = UIFont.systemFont(ofSize: 16)
-        textField.backgroundColor = .clear
-        textField.translatesAutoresizingMaskIntoConstraints = false
-        
-        return textField
-    }
-    
-    /** 버튼 생성 */
-    private func createButton(imageName: String) -> UIButton {
-        let button = UIButton()
-        
-        button.setImage(UIImage(systemName: imageName), for: .normal)
-        button.tintColor = .mainPink
-        button.translatesAutoresizingMaskIntoConstraints = false
-        
-        return button
     }
 }
