@@ -175,7 +175,9 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
             switch result{
             case .success(let storeResponse):
                 print("받아온 가게의 수 : ", storeResponse.data.count)
+                print("받아온 가게 정보 : ", storeResponse.data)
                 self.displaySetMarker(storeResponse.data, mapContainerView)
+                self.bottomCardView.updateStores(storeResponse.data)
             case .failure(let error):
                 print("오류 발생", error)
                 print(APIConstants.getStores)

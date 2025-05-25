@@ -14,7 +14,10 @@ import UIKit
 class BottomCardView: UIView {
     
     private let tableView = UITableView()
-    private var homeShopData: [HomeShopData] = []
+    
+    // 가게 정보
+    private var stores: [Store] = []
+    // private var homeShopData: [HomeShopData] = []
     
     // 닫힌 상태의 카드 뷰 최소 높이
     private var minCardViewHeight: CGFloat!
@@ -99,7 +102,7 @@ class BottomCardView: UIView {
             tableView.register(HomeContentTableViewCell.self, forCellReuseIdentifier: HomeContentTableViewCell.identifier)
             
             // 임시 데이터 삽입
-            homeShopData = sampleHomeShops
+            // homeShopData = sampleHomeShops
             
             addSubview(tableView)
             
@@ -175,6 +178,13 @@ class BottomCardView: UIView {
             if newTop >= expandedTop && newTop <= collapsedTop {
                 // 현재 카드뷰가 상하 한계 범위에 있으면 카드뷰 이동
                 topConstraint.constant = newTop
+                print("현재 카드뷰 위치(newTop) : \(newTop)")
+                print("현재 카드뷰 좌표(translation) : \(translation)")
+                /*
+                 
+                 현재 카드뷰 위치(newTop) : 480.7681884765625
+                 현재 카드뷰 좌표(translation) : (0.0, -0.2340087890625)
+                 */
                 updateBackgroundOpacity()
                 // 다음 제스쳐를 계산하기 위해 움직인 값 초기화
                 gesture.setTranslation(.zero, in: parentView)
@@ -244,6 +254,12 @@ class BottomCardView: UIView {
     func resetBackgroundColor(){
         backgroundView.backgroundColor = .clear
     }
+    
+    // 데이터 주입
+    func updateStores(_ newStores: [Store]) {
+        self.stores = newStores
+        tableView.reloadData()
+    }
 }
 
 // MARK: - 카드뷰 확장
@@ -251,26 +267,25 @@ extension BottomCardView: UITableViewDataSource, UITableViewDelegate {
     
     // 셀 개수 지정
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return homeShopData.count
+        return stores.count
     }
-    
-    // 셀 표시 내용 지정
+
+    // 표시 내용
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard isHomeViewCheck else { return UITableViewCell() }
-        
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: HomeContentTableViewCell.identifier,
-                                                       for: indexPath) as? HomeContentTableViewCell else {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: HomeContentTableViewCell.identifier, for: indexPath) as? HomeContentTableViewCell else {
             return UITableViewCell()
         }
-        
-        let shop = homeShopData[indexPath.row]
+
+        let store = stores[indexPath.row]
+        let descriptionText = (store.description?.isEmpty ?? true) ? "할인 내용이 들어갑니다." : store.description!
         cell.configure(
-            shopImage: shop.imageName,
-            shopTitle: shop.title,
-            shopCategory: shop.category,
-            shopContent: shop.content,
-            shopFavorite: shop.isFavorite
+            shopImage: store.imageURL,
+            shopTitle: store.name,
+            shopCategory: store.category ?? "기타",
+            shopContent: descriptionText,
+            shopFavorite: false
         )
+        
         return cell
     }
 }

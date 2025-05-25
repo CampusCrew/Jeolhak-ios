@@ -38,6 +38,9 @@ class HomeContentTableViewCell: UITableViewCell {
     private func setupViews(){
         selectionStyle = .none
         
+        // (임시) 다크모드 무시하고 배경 강제 white
+        contentView.backgroundColor = .white
+        
         // 가게 사진
         shopImageView.contentMode = .scaleAspectFit
         shopImageView.clipsToBounds = true
@@ -45,6 +48,7 @@ class HomeContentTableViewCell: UITableViewCell {
         
         // 가게 이름 (Title)
         shopTitleLabel.font = UIFont(name: "Jua-Regular", size: 16)
+        shopTitleLabel.textColor = .black
         shopTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         
         // 가게 분류
@@ -113,7 +117,16 @@ class HomeContentTableViewCell: UITableViewCell {
     // MARK: - 뷰 설정
     // 생성자로 받아온 뷰 초기화
     func configure(shopImage: String, shopTitle: String, shopCategory: String, shopContent: String, shopFavorite: Bool){
-        shopImageView.image = UIImage(named: shopImage) // URL 이미지 비동기 로드 가능
+        if let url = URL(string: shopImage) {
+            DispatchQueue.global().async {
+                if let data = try? Data(contentsOf: url),
+                   let image = UIImage(data: data) {
+                    DispatchQueue.main.async {
+                        self.shopImageView.image = image
+                    }
+                }
+            }
+        }
         shopTitleLabel.text = shopTitle
         shopCategoryLabel.text = shopCategory
         shopContentLabel.text = shopContent
