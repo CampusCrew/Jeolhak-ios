@@ -179,7 +179,7 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
                 print("받아온 가게 정보 : ", storeResponse.data)
                 
                 // 할인되는 가게가 없을 떄. (받아온 가게의 수 0일떄)
-                if storeResponse.data.isEmpty {
+                if storeResponse.data.count == 0 {
                     // 할인되는 가게가 없다면 플래그 true
                     if !self.noStoresAlertFlag {
                         self.noStoresAlertFlag = true
@@ -215,7 +215,11 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         alert.setValue(fullMessage, forKey: "attributedMessage")
         
         // 확인
-        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        let confirm = UIAlertAction(title: "확인", style: .default) { _ in
+            // 확인 누를 시 플래그 리셋
+            self.noStoresAlertFlag = false
+        }
+        alert.addAction(confirm)
         
         self.present(alert, animated: true)
     }
