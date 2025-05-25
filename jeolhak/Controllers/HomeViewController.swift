@@ -17,6 +17,9 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
     private var bottomCardView: BottomCardView!
     private var bottomInfoViewTopConstraintNeedsReset = true
     
+    // "가게 없음" 팝업 중복 방지 플래그
+    private var noStoresAlertFlag = false
+    
     // 검색 뷰
     private var searchBarContainer: UIView!
     
@@ -29,7 +32,6 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
     // 사용자 데이터
     private var department: String = ""
     private var major: String = ""
-    
     // 사용자 데이터 표시
     private var departmentView: HomeSelectedUserInfoView!
     private var majorView: HomeSelectedUserInfoView!
@@ -175,6 +177,19 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
             case .success(let storeResponse):
                 print("받아온 가게의 수 : ", storeResponse.data.count)
                 print("받아온 가게 정보 : ", storeResponse.data)
+                
+                // 할인되는 가게가 없을 떄. (받아온 가게의 수 0일떄)
+                if storeResponse.data.isEmpty {
+                    // 할인되는 가게가 없다면 플래그 true
+                    if !self.noStoresAlertFlag {
+                        self.noStoresAlertFlag = true
+                        self.showNoStoresAlert()
+                    }
+                } else {
+                    // 할인되는 가게가 있을 때 플래그 초기화
+                    self.noStoresAlertFlag = false
+                }
+                
                 self.displaySetMarker(storeResponse.data, mapContainerView)
                 self.bottomCardView.updateStores(storeResponse.data)
                 print("✅ bottomCardView 상태: \(String(describing: self.bottomCardView))")
@@ -183,6 +198,26 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
                 print(APIConstants.getStores)
             }
         }
+    }
+    
+    // 할인되는 가게가 없을 때 Alert
+    private func showNoStoresAlert(){
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+        
+        let message = "할인되는 가게가 없어요..ㅠㅠ"
+        let imageAttachment = NSTextAttachment()
+        imageAttachment.image = UIImage(systemName: "cloud.rain.fill")?.withTintColor(.mainPink, renderingMode: .alwaysOriginal)
+        imageAttachment.bounds = CGRect(x: 0, y: -2, width: 20, height: 20)
+        
+        let fullMessage = NSMutableAttributedString(attachment: imageAttachment)
+        fullMessage.append(NSAttributedString(string: "  \(message)"))
+        
+        alert.setValue(fullMessage, forKey: "attributedMessage")
+        
+        // 확인
+        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        
+        self.present(alert, animated: true)
     }
     
     /** 현재 위치 기준 마커 요청 */
