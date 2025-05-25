@@ -69,7 +69,7 @@ class BottomCardView: UIView {
             backgroundView.bottomAnchor.constraint(equalTo: parentView.bottomAnchor)
         ])
     }
-
+    
     /** 카드 뷰 설정 함수 */
     private func setupBottomCardView() {
         backgroundColor = .white
@@ -93,16 +93,15 @@ class BottomCardView: UIView {
             handle.heightAnchor.constraint(equalToConstant: 5)
         ])
         
+        // HomeVC에서 호출했을 때
         if isHomeViewCheck {
             tableView.translatesAutoresizingMaskIntoConstraints = false
+            tableView.backgroundColor = .white
             tableView.separatorStyle = .none
             tableView.showsVerticalScrollIndicator = false
             tableView.dataSource = self
             tableView.delegate = self
             tableView.register(HomeContentTableViewCell.self, forCellReuseIdentifier: HomeContentTableViewCell.identifier)
-            
-            // 임시 데이터 삽입
-            // homeShopData = sampleHomeShops
             
             addSubview(tableView)
             
@@ -112,26 +111,27 @@ class BottomCardView: UIView {
                 tableView.trailingAnchor.constraint(equalTo: parentView.trailingAnchor, constant: -20),
                 tableView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -safeAreaInset())
             ])
+            // FavoriteVC에서 호출했을 떄
         } else {
-//            let favoriteTestView = FavoriteContentItemView(
-//                shopTitle: "GT커피 모현점",
-//                shopCategory: "디저트",
-//                shopLocation: "익산시 서동로 18길 42",
-//                shopImage: "testImage",
-//                shopFavorite: false
-//            )
-//            
-//            addSubview(favoriteTestView)
-//            
-//            NSLayoutConstraint.activate([
-//                favoriteTestView.topAnchor.constraint(equalTo: handle.topAnchor, constant: 15),
-//                favoriteTestView.leadingAnchor.constraint(equalTo: parentView.leadingAnchor, constant: 20),
-//                favoriteTestView.trailingAnchor.constraint(equalTo: parentView.trailingAnchor, constant: -20)
-//            ])
+            //            let favoriteTestView = FavoriteContentItemView(
+            //                shopTitle: "GT커피 모현점",
+            //                shopCategory: "디저트",
+            //                shopLocation: "익산시 서동로 18길 42",
+            //                shopImage: "testImage",
+            //                shopFavorite: false
+            //            )
+            //
+            //            addSubview(favoriteTestView)
+            //
+            //            NSLayoutConstraint.activate([
+            //                favoriteTestView.topAnchor.constraint(equalTo: handle.topAnchor, constant: 15),
+            //                favoriteTestView.leadingAnchor.constraint(equalTo: parentView.leadingAnchor, constant: 20),
+            //                favoriteTestView.trailingAnchor.constraint(equalTo: parentView.trailingAnchor, constant: -20)
+            //            ])
         }
         
         topConstraint = topAnchor.constraint(equalTo: parentView.topAnchor, constant: parentView.frame.height - minCardViewHeight)
-
+        
         NSLayoutConstraint.activate([
             topConstraint,
             leadingAnchor.constraint(equalTo: parentView.leadingAnchor),
@@ -172,7 +172,7 @@ class BottomCardView: UIView {
         let newTop = topConstraint.constant + translation.y
         
         switch gesture.state {
-        // 드래그중일때
+            // 드래그중일때
         case .changed:
             // newTop : 현재 카드뷰의 위치
             if newTop >= expandedTop && newTop <= collapsedTop {
@@ -191,7 +191,7 @@ class BottomCardView: UIView {
                 // 클로저 호출 (부모뷰에게 제스처중임을 알리기)
                 onPanChanged?()
             }
-        // 드래그가 끝났을 때
+            // 드래그가 끝났을 때
         case .ended:
             // 손가락을 위로 쓸었으면(true) 카드뷰를 위로 올리기
             // 손가락을 아래로 쓸었으면(false) 카드뷰를 아래로 내리기
@@ -204,8 +204,8 @@ class BottomCardView: UIView {
     }
     
     /** 카드 뷰 애니메이션 컨트롤
-        true: 카드뷰 열린상태
-        false : 카드뷰 닫힌 상태
+     true: 카드뷰 열린상태
+     false : 카드뷰 닫힌 상태
      */
     private func animate(expand: Bool) {
         // 카드뷰가 열려있다면(true) 완전히 펼친 위치로 이동
@@ -259,6 +259,36 @@ class BottomCardView: UIView {
     func updateStores(_ newStores: [Store]) {
         self.stores = newStores
         tableView.reloadData()
+
+        if stores.isEmpty {
+            let emptyView = UIView(frame: tableView.bounds)
+
+            let label = UILabel()
+            label.text = "할인되는 가게가 없어요..ㅠㅠ"
+            label.font = UIFont(name: "Jua-Regular", size: 21)
+            label.textColor = .darkGray
+            label.translatesAutoresizingMaskIntoConstraints = false
+
+            let imageView = UIImageView()
+            let config = UIImage.SymbolConfiguration(pointSize: 21, weight: .regular)
+            imageView.image = UIImage(systemName: "cloud.rain.fill", withConfiguration: config)
+            imageView.tintColor = .mainPink
+            imageView.translatesAutoresizingMaskIntoConstraints = false
+
+            emptyView.addSubview(label)
+            emptyView.addSubview(imageView)
+
+            NSLayoutConstraint.activate([
+                label.centerXAnchor.constraint(equalTo: emptyView.centerXAnchor, constant: -15),
+                label.centerYAnchor.constraint(equalTo: emptyView.centerYAnchor),
+                imageView.leadingAnchor.constraint(equalTo: label.trailingAnchor, constant: 8),
+                imageView.centerYAnchor.constraint(equalTo: label.centerYAnchor)
+            ])
+
+            tableView.backgroundView = emptyView
+        } else {
+            tableView.backgroundView = nil
+        }
     }
 }
 
@@ -269,13 +299,13 @@ extension BottomCardView: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return stores.count
     }
-
+    
     // 표시 내용
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: HomeContentTableViewCell.identifier, for: indexPath) as? HomeContentTableViewCell else {
             return UITableViewCell()
         }
-
+        
         let store = stores[indexPath.row]
         let descriptionText = (store.description?.isEmpty ?? true) ? "할인 내용이 들어갑니다." : store.description!
         cell.configure(

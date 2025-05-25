@@ -61,7 +61,6 @@ class NotificationContentView: UIView {
             icon.widthAnchor.constraint(equalToConstant: 20),
             icon.heightAnchor.constraint(equalToConstant: 20)
         ])
-        
         // 텍스트
         let label = UILabel()
         label.text = content

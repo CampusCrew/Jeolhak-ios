@@ -126,7 +126,6 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
                         major,
                         mapContainerView)
         }
-        
     }
     
     deinit {
@@ -178,6 +177,7 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
                 print("받아온 가게 정보 : ", storeResponse.data)
                 self.displaySetMarker(storeResponse.data, mapContainerView)
                 self.bottomCardView.updateStores(storeResponse.data)
+                print("✅ bottomCardView 상태: \(String(describing: self.bottomCardView))")
             case .failure(let error):
                 print("오류 발생", error)
                 print(APIConstants.getStores)
