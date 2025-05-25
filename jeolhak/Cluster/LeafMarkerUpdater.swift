@@ -10,6 +10,12 @@ import NMapsMap
 class LeafMarkerUpdater: NMCDefaultLeafMarkerUpdater {
     var stores: [Store] = []
     
+    // BottomCardView 참조
+    weak var bottomCardView: BottomCardView?
+    
+    // 마커 클릭 호출 클로저
+    var onMarkerTapped: ((Store) -> Void)?
+    
     override func updateLeafMarker(_ info: NMCLeafMarkerInfo, _ marker: NMFMarker) {
         super.updateLeafMarker(info, marker)
         guard let key = info.key as? StoreKey else { return }
@@ -25,8 +31,19 @@ class LeafMarkerUpdater: NMCDefaultLeafMarkerUpdater {
         
         // 식별자 기준으로 Store 찾기
         if key.identifier < stores.count {
+            let store = stores[key.identifier]
             marker.captionText = stores[key.identifier].name
             marker.captionAligns = [NMFAlignType.top]
+            
+            // 마커 터치 핸들러 (클로저 연결)
+            marker.touchHandler = { [weak self] (overlay: NMFOverlay) -> Bool in
+                guard let self = self else { return false }
+                
+                // 가게 데이터 콜백
+                self.bottomCardView?.showSelectedStore(store, targetTop: 480)
+                
+                return true
+            }
         }
     }
 }

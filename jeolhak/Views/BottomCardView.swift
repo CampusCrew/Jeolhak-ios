@@ -32,6 +32,9 @@ class BottomCardView: UIView {
     // true : HomeView에서 호출, false : FavoriteView에서 호출
     private var isHomeViewCheck: Bool
     
+    // store 목록 백업
+    private var originalStores: [Store] = []
+    
     // 외부에서 정의 가능한 콜백 함수 정의
     // BottomCardView 안에서 제스처가 발생했을 때 외부에 알리기 위한 이벤트 트리거
     // (() -> Void)? : 아무 인자도 받지 않고, 아무것도 반환하지 않는 클로저 타입 (옵셔널)
@@ -256,35 +259,39 @@ class BottomCardView: UIView {
     }
     
     // 데이터 주입
-    func updateStores(_ newStores: [Store]) {
+    func updateStores(_ newStores: [Store], keepOriginal: Bool = false) {
+        if !keepOriginal && originalStores.isEmpty && !stores.isEmpty {
+            originalStores = stores
+        }
+        
         self.stores = newStores
         tableView.reloadData()
-
+        
         if stores.isEmpty {
             let emptyView = UIView(frame: tableView.bounds)
-
+            
             let label = UILabel()
             label.text = "할인되는 가게가 없어요..ㅠㅠ"
             label.font = UIFont(name: "Jua-Regular", size: 21)
             label.textColor = .darkGray
             label.translatesAutoresizingMaskIntoConstraints = false
-
+            
             let imageView = UIImageView()
             let config = UIImage.SymbolConfiguration(pointSize: 21, weight: .regular)
             imageView.image = UIImage(systemName: "cloud.rain.fill", withConfiguration: config)
             imageView.tintColor = .mainPink
             imageView.translatesAutoresizingMaskIntoConstraints = false
-
+            
             emptyView.addSubview(label)
             emptyView.addSubview(imageView)
-
+            
             NSLayoutConstraint.activate([
                 label.centerXAnchor.constraint(equalTo: emptyView.centerXAnchor, constant: -15),
                 label.centerYAnchor.constraint(equalTo: emptyView.centerYAnchor),
                 imageView.leadingAnchor.constraint(equalTo: label.trailingAnchor, constant: 8),
                 imageView.centerYAnchor.constraint(equalTo: label.centerYAnchor)
             ])
-
+            
             tableView.backgroundView = emptyView
         } else {
             tableView.backgroundView = nil
@@ -292,7 +299,7 @@ class BottomCardView: UIView {
     }
 }
 
-// MARK: - 카드뷰 확장
+// MARK: - 카드뷰 확장 (DataSource, Delegate 설정)
 extension BottomCardView: UITableViewDataSource, UITableViewDelegate {
     
     // 셀 개수 지정
@@ -317,5 +324,52 @@ extension BottomCardView: UITableViewDataSource, UITableViewDelegate {
         )
         
         return cell
+    }
+}
+
+// MARK: - 마커 클릭 카드뷰 특정 위치까지 올리기 (Y = 480)
+extension BottomCardView {
+    
+    // 마커 클릭 시 Y좌표 480까지 카드 뷰 올리기
+    func showCardForMarker(targetTop: CGFloat = 480, selectedStore: Store? = nil) {
+        // 목표 위치가 허용 범위 내에 있는지 확인
+        let safeTargetTop = max(maxCardViewHeight, min(targetTop, parentView.frame.height - minCardViewHeight))
+        
+        // 선택된 Store가 있다면 해당 Store만 표시하도록 데이터 업데이트
+        if let store = selectedStore {
+            updateStores([store])
+        }
+        
+        // 카드뷰 위치 업데이트
+        topConstraint.constant = safeTargetTop
+        
+        // 애니메이션 실행
+        UIView.animate(
+            withDuration: 0.5,                    // 애니메이션 지속시간
+            delay: 0,
+            usingSpringWithDamping: 0.8,          // 스프링 효과 (0.8 = 약간의 바운스)
+            initialSpringVelocity: 0.2,
+            options: [.curveEaseOut],
+            animations: {
+                self.parentView.layoutIfNeeded()
+                self.updateBackgroundOpacity()
+            },
+            completion: { _ in
+                // 애니메이션 완료 후 콜백 호출
+                self.onPanChanged?()
+            }
+        )
+    }
+    
+    // 마커 클릭 시 단일 Store 정보 출력
+    func showSelectedStore(_ store: Store, targetTop: CGFloat = 480) {
+        showCardForMarker(targetTop: targetTop, selectedStore: store)
+    }
+    
+    func restoreOriginalStores() {
+        if !originalStores.isEmpty {
+            updateStores(originalStores)
+            originalStores.removeAll()
+        }
     }
 }
