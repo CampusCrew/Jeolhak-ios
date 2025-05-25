@@ -44,6 +44,7 @@ class HomeContentTableViewCell: UITableViewCell {
         // 가게 사진
         shopImageView.contentMode = .scaleAspectFit
         shopImageView.clipsToBounds = true
+//        shopImageView.layer.cornerRadius = 50
         shopImageView.translatesAutoresizingMaskIntoConstraints = false
         
         // 가게 이름 (Title)

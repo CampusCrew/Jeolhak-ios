@@ -225,6 +225,11 @@ class BottomCardView: UIView {
             // 바뀐 제약조건을 즉시 반영하여 카드뷰가 부드럽게 이동하도록 유도
             self.parentView.layoutIfNeeded()
             self.updateBackgroundOpacity()
+        }, completion: { _ in
+            // 카드뷰가 닫힐 떄 원본 데이터 복구
+            if !expand {
+                self.restoreOriginalStores()
+            }
         })
     }
     
@@ -251,6 +256,9 @@ class BottomCardView: UIView {
         let collapsedTop = parentView.frame.height - minCardViewHeight
         topConstraint.constant = collapsedTop
         parentView.layoutIfNeeded()
+        
+        // 본래 가게 목록으로 변경
+        restoreOriginalStores()
     }
     
     /** 백그라운드 초기화 */
@@ -260,7 +268,7 @@ class BottomCardView: UIView {
     
     // 데이터 주입
     func updateStores(_ newStores: [Store], keepOriginal: Bool = false) {
-        if !keepOriginal && originalStores.isEmpty && !stores.isEmpty {
+        if keepOriginal && originalStores.isEmpty {
             originalStores = stores
         }
         
@@ -335,9 +343,9 @@ extension BottomCardView {
         // 목표 위치가 허용 범위 내에 있는지 확인
         let safeTargetTop = max(maxCardViewHeight, min(targetTop, parentView.frame.height - minCardViewHeight))
         
-        // 선택된 Store가 있다면 해당 Store만 표시하도록 데이터 업데이트
+        // 선택된 Store가 있다면 해당 Store만 표시하도록 데이터 업데이트 (원본 데이터는 보관, true)
         if let store = selectedStore {
-            updateStores([store])
+            updateStores([store], keepOriginal: true)
         }
         
         // 카드뷰 위치 업데이트
@@ -345,9 +353,9 @@ extension BottomCardView {
         
         // 애니메이션 실행
         UIView.animate(
-            withDuration: 0.5,                    // 애니메이션 지속시간
+            withDuration: 0.5,
             delay: 0,
-            usingSpringWithDamping: 0.8,          // 스프링 효과 (0.8 = 약간의 바운스)
+            usingSpringWithDamping: 0.9,
             initialSpringVelocity: 0.2,
             options: [.curveEaseOut],
             animations: {
@@ -366,10 +374,11 @@ extension BottomCardView {
         showCardForMarker(targetTop: targetTop, selectedStore: store)
     }
     
+    // 본래 가게 데이터 출력 (원상복구)
     func restoreOriginalStores() {
         if !originalStores.isEmpty {
             updateStores(originalStores)
-            originalStores.removeAll()
+            // originalStores.removeAll()
         }
     }
 }

@@ -260,6 +260,12 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         print("클릭된 마커의 가게 : \(store)")
     }
     
+    // 개별 가게 출력에서 모든 가게 출력
+    @objc private func resetToOriginalList() {
+        bottomCardView.restoreOriginalStores()
+        bottomCardView.closeCardView()
+    }
+    
     // 위치 콜백 정의 (현재 위치 기반, 모달 모드가 init일 때 실행)
     private func setLocationCallback() {
         // 위치 호출 콜백
