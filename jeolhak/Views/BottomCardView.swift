@@ -32,6 +32,9 @@ class BottomCardView: UIView {
     // true : HomeView에서 호출, false : FavoriteView에서 호출
     private var isHomeViewCheck: Bool
     
+    // 카드 뷰 열림(true), 닫힘(false) 판단 (기본값 : 닫힘, false)
+    private var isCardViewOpen: Bool = false
+    
     // store 목록 백업
     private var originalStores: [Store] = []
     
@@ -58,10 +61,18 @@ class BottomCardView: UIView {
     
     /** 카드 뷰가 올라올 때 부모 뷰 블랙 */
     private func setupBackgroundView() {
-        backgroundView = UIView()
+        // 커스텀 클래스 연결
+        backgroundView = TransparentPassThroughView()
         backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.0)
         backgroundView.translatesAutoresizingMaskIntoConstraints = false
         backgroundView.isUserInteractionEnabled = false
+        
+        // 탭 이벤트 추가
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(backgroundTapped))
+        tapGesture.cancelsTouchesInView = false // 임시 디버깅용
+        backgroundView.addGestureRecognizer(tapGesture)
+        print("✅ 배경 탭 제스처 연결됨")
+        
         
         parentView.addSubview(backgroundView)
         
@@ -71,6 +82,12 @@ class BottomCardView: UIView {
             backgroundView.trailingAnchor.constraint(equalTo: parentView.trailingAnchor),
             backgroundView.bottomAnchor.constraint(equalTo: parentView.bottomAnchor)
         ])
+    }
+    
+    // background 터치 이벤트
+    @objc private func backgroundTapped(){
+        print("✅ backgroundTapped 실행됨!")
+        closeCardView()
     }
     
     /** 카드 뷰 설정 함수 */
@@ -181,14 +198,12 @@ class BottomCardView: UIView {
             if newTop >= expandedTop && newTop <= collapsedTop {
                 // 현재 카드뷰가 상하 한계 범위에 있으면 카드뷰 이동
                 topConstraint.constant = newTop
-                print("현재 카드뷰 위치(newTop) : \(newTop)")
-                print("현재 카드뷰 좌표(translation) : \(translation)")
                 /*
                  
                  현재 카드뷰 위치(newTop) : 480.7681884765625
                  현재 카드뷰 좌표(translation) : (0.0, -0.2340087890625)
                  */
-                updateBackgroundOpacity()
+                //updateBackgroundOpacity()
                 // 다음 제스쳐를 계산하기 위해 움직인 값 초기화
                 gesture.setTranslation(.zero, in: parentView)
                 // 클로저 호출 (부모뷰에게 제스처중임을 알리기)
@@ -224,8 +239,21 @@ class BottomCardView: UIView {
         UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseOut], animations: {
             // 바뀐 제약조건을 즉시 반영하여 카드뷰가 부드럽게 이동하도록 유도
             self.parentView.layoutIfNeeded()
-            self.updateBackgroundOpacity()
+            //self.updateBackgroundOpacity()
         }, completion: { _ in
+            // 카드뷰 열림 상태 플래그
+            self.isCardViewOpen = expand
+            
+            // 카드뷰 isUserInteractionEnabled 판단
+            if let passThroughView = self.backgroundView as? TransparentPassThroughView {
+                passThroughView.shouldReceiveTouch = expand
+                if expand {
+                    print("✅ 카드뷰 열림 → 배경 터치 허용 ON")
+                } else {
+                    print("🛑 카드뷰 닫힘 → 배경 터치 허용 OFF")
+                }
+            }
+            
             // 카드뷰가 닫힐 떄 원본 데이터 복구
             if !expand {
                 self.restoreOriginalStores()
@@ -234,14 +262,14 @@ class BottomCardView: UIView {
     }
     
     /** 카드 뷰를 사용하는 부모 뷰의 배경색 변경 */
-    private func updateBackgroundOpacity() {
-        let currentTop = topConstraint.constant
-        let collapsedTop = parentView.frame.height - minCardViewHeight
-        let expandedTop = maxCardViewHeight
-        
-        let ratio = 1 - ((currentTop - expandedTop) / (collapsedTop - expandedTop))
-        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.3 * ratio)
-    }
+//    private func updateBackgroundOpacity() {
+//        let currentTop = topConstraint.constant
+//        let collapsedTop = parentView.frame.height - minCardViewHeight
+//        let expandedTop = maxCardViewHeight
+//        
+//        let ratio = 1 - ((currentTop - expandedTop) / (collapsedTop - expandedTop))
+//        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.3 * ratio)
+//    }
     
     // 퍼블릭 인터페이스 : 외부에서 BottomCardView 상태 제어
     /** 카드뷰가 최대로 올라갈 수 있는 위치 설정
@@ -253,11 +281,17 @@ class BottomCardView: UIView {
     
     /** 카드 뷰 위치 초기화 -> 접혀 있는 상태로 카드뷰 강제 이동 */
     func closeCardView() {
+        print("closeCardView 실행")
         let collapsedTop = parentView.frame.height - minCardViewHeight
         topConstraint.constant = collapsedTop
         parentView.layoutIfNeeded()
         
-        // 본래 가게 목록으로 변경
+        isCardViewOpen = false
+        
+        if let passThroughView = backgroundView as? TransparentPassThroughView {
+            passThroughView.shouldReceiveTouch = false
+        }
+        
         restoreOriginalStores()
     }
     
@@ -360,9 +394,17 @@ extension BottomCardView {
             options: [.curveEaseOut],
             animations: {
                 self.parentView.layoutIfNeeded()
-                self.updateBackgroundOpacity()
+                //self.updateBackgroundOpacity()
             },
             completion: { _ in
+                // 카드뷰 열림 상태로 설정
+                self.isCardViewOpen = true
+                
+                // 배경 터치 허용
+                if let passThroughView = self.backgroundView as? TransparentPassThroughView {
+                    passThroughView.shouldReceiveTouch = true
+                    print("✅ 마커 클릭 → 카드뷰 열림 → 배경 터치 허용 ON")
+                }
                 // 애니메이션 완료 후 콜백 호출
                 self.onPanChanged?()
             }
