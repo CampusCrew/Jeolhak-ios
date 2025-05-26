@@ -11,6 +11,9 @@ target 'jeolhak' do
   # Alamofire
   pod 'Alamofire'
 
+  # Kingfisher
+  pod 'Kingfisher'
+
   # Pods for jeolhak
 
   target 'jeolhakTests' do

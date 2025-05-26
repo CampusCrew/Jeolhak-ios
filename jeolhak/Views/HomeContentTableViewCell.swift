@@ -6,6 +6,8 @@
 //
 
 import UIKit
+// Kingfisher 호출
+import Kingfisher
 
 // MARK: - 홈 화면 카드뷰 가게 정보
 class HomeContentTableViewCell: UITableViewCell {
@@ -44,7 +46,6 @@ class HomeContentTableViewCell: UITableViewCell {
         // 가게 사진
         shopImageView.contentMode = .scaleAspectFit
         shopImageView.clipsToBounds = true
-//        shopImageView.layer.cornerRadius = 50
         shopImageView.translatesAutoresizingMaskIntoConstraints = false
         
         // 가게 이름 (Title)
@@ -118,16 +119,10 @@ class HomeContentTableViewCell: UITableViewCell {
     // MARK: - 뷰 설정
     // 생성자로 받아온 뷰 초기화
     func configure(shopImage: String, shopTitle: String, shopCategory: String, shopContent: String, shopFavorite: Bool){
-        if let url = URL(string: shopImage) {
-            DispatchQueue.global().async {
-                if let data = try? Data(contentsOf: url),
-                   let image = UIImage(data: data) {
-                    DispatchQueue.main.async {
-                        self.shopImageView.image = image
-                    }
-                }
-            }
-        }
+        // 이미지 Kingfisher 사용
+        let cornerImageProcessor = RoundCornerImageProcessor(cornerRadius: 20)
+        shopImageView.kf.indicatorType = .activity
+        shopImageView.kf.setImage(with: URL(string: shopImage), options: [.transition(.fade(0.5)), .processor(cornerImageProcessor)])
         shopTitleLabel.text = shopTitle
         shopCategoryLabel.text = shopCategory
         shopContentLabel.text = shopContent

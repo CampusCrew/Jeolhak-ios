@@ -1,24 +1,28 @@
 PODS:
   - Alamofire (5.10.2)
+  - Kingfisher (8.3.2)
   - NMapsGeometry (1.0.2)
   - NMapsMap (3.21.0):
     - NMapsGeometry
 
 DEPENDENCIES:
   - Alamofire
+  - Kingfisher
   - NMapsMap
 
 SPEC REPOS:
   trunk:
     - Alamofire
+    - Kingfisher
     - NMapsGeometry
     - NMapsMap
 
 SPEC CHECKSUMS:
   Alamofire: 7193b3b92c74a07f85569e1a6c4f4237291e7496
+  Kingfisher: 0621d0ac0c78fecb19f6dc5303bde2b52abaf2f5
   NMapsGeometry: 4e02554fa9880ef02ed96b075dc84355d6352479
   NMapsMap: 8e7e35c2446e7c4a88d6dd0d64aa0d1de903e4f0
 
-PODFILE CHECKSUM: 5bbd961e8820d26cf7583e506eb16286d6fa9714
+PODFILE CHECKSUM: 486c82a463d39b3672cc7a5c0191879c1cd2cfc4
 
 COCOAPODS: 1.16.2
