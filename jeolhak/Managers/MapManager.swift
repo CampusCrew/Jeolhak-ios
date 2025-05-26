@@ -16,7 +16,7 @@ class MapManager: NSObject, CLLocationManagerDelegate {
     static let shared = MapManager()
     
     private let locationManager = CLLocationManager()
-    private var mapView: NMFMapView? = nil
+    var mapView: NMFMapView? = nil
     
     // 현재 위치 저장
     var currentLocation: CLLocationCoordinate2D? = nil
