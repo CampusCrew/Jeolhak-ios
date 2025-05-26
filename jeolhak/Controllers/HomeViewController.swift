@@ -20,6 +20,11 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
     // "가게 없음" 팝업 중복 방지 플래그
     private var noStoresAlertFlag = false
     
+    // "현재 위치에서 검색" 뷰 출력 플래그 : 제스처 움직임 멈춤 감지시 true, 아니면 false (기본값), (임시적으로 사용 안함)
+    // private var isMoveMapResearchFlag = false
+    // "현재 위치에서 검색" 뷰 (임시적으로 사용 안함)
+    // private var moveMapResearchView: HomeMoveMapResearchView!
+    
     // 검색 뷰
     private var searchBarContainer: UIView!
     
@@ -88,6 +93,51 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         
         // 지도 출력
         MapManager.shared.setMapView(mapContainerView.customMapView.mapView)
+        
+        // "현재 위치에서 검색" : 카메라 이동 종료 시 카메라 위치 출력 (임시적으로 사용 안함)
+//        MapManager.shared.onCameraIdle = { [weak self] cameraPosition in
+//            guard let self = self else { return }
+//            
+//            print("사용자가 지도 움직인 뒤 위치 : \(cameraPosition.target.lat), \(cameraPosition.target.lng)")
+//            
+//            // 출력되지 않으면 다시 출력 X
+//            guard self.moveMapResearchView == nil else { return }
+//            
+//            let refreshView = HomeMoveMapResearchView()
+//            refreshView.translatesAutoresizingMaskIntoConstraints = false
+//            refreshView.alpha = 0 // 처음엔 투명
+//            
+//            self.view.addSubview(refreshView)
+//            
+//            refreshView.onTap = {
+//                print("현재 위치 제검색 실행")
+//                self.fetchStores(latitude: cameraPosition.target.lat,
+//                                 longitude: cameraPosition.target.lng,
+//                                 self.department,
+//                                 self.major,
+//                                 self.mapContainerView)
+//                
+//                // 검색 후 뷰 제거
+//                UIView.animate(withDuration: 0.3, animations: {
+//                    refreshView.alpha = 0
+//                }, completion: { _ in
+//                    refreshView.removeFromSuperview()
+//                    self.moveMapResearchView = nil
+//                })
+//            }
+//            
+//            self.view.addSubview(refreshView)
+//            NSLayoutConstraint.activate([
+//                refreshView.topAnchor.constraint(equalTo: self.searchBarContainer.bottomAnchor, constant: 10),
+//                refreshView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor)
+//            ])
+//            
+//            self.moveMapResearchView = refreshView
+//            
+//            UIView.animate(withDuration: 0.3) {
+//                refreshView.alpha = 1
+//            }
+//        }
         
         // 검색, 단과/학과 정보 출력
         setupSearchBarAndUserInfo()
@@ -189,8 +239,9 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
                     // 할인되는 가게가 있을 때 플래그 초기화
                     self.noStoresAlertFlag = false
                 }
-                
+                // 마커 호출
                 self.displaySetMarker(storeResponse.data, mapContainerView)
+                // 카드뷰 리스트 업데이트
                 self.bottomCardView.updateStores(storeResponse.data)
                 print("✅ bottomCardView 상태: \(String(describing: self.bottomCardView))")
             case .failure(let error):

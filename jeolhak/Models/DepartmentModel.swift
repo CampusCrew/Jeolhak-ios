@@ -50,7 +50,7 @@ let allDepartments: [Department] = [
         "복지/보건학부/사회복지학 및 보건행정학 전공", "소방행정학과", "행정공공기관학과"
     ]),
     Department(departmentName: "생명교양교육원", majors: [
-        "생명교약교육원 전체",
+        "생명교양교육원 전체",
         "교양교육과", "비교과통합센터"
     ]),
     Department(departmentName: "약학대학", majors: [

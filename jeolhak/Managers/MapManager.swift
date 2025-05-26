@@ -11,7 +11,7 @@ import Foundation
 import CoreLocation
 import NMapsMap
 
-class MapManager: NSObject, CLLocationManagerDelegate {
+class MapManager: NSObject, CLLocationManagerDelegate, NMFMapViewCameraDelegate {
     
     static let shared = MapManager()
     
@@ -28,6 +28,9 @@ class MapManager: NSObject, CLLocationManagerDelegate {
     var onLocationUpdate: ((CLLocationCoordinate2D) -> Void)?
     var onLocationUpdateFail: (() -> Void)?
     
+    // 카메라 위치 콜백 (임시적으로 사용 안함)
+    // var onCameraIdle: ((NMFCameraPosition) -> Void)?
+    
     private override init() {
         super.init()
         locationManager.delegate = self
@@ -38,6 +41,8 @@ class MapManager: NSObject, CLLocationManagerDelegate {
     // 네이버 맵 연결 시 최초 1회 위치 요청
     func setMapView(_ mapView: NMFMapView) {
         self.mapView = mapView
+        // 카메라 Delegate 등록
+        mapView.addCameraDelegate(delegate: self)
         
         if !hasRequestedLocation {
             hasRequestedLocation = true
@@ -49,9 +54,17 @@ class MapManager: NSObject, CLLocationManagerDelegate {
     func requestCurrentLocation() {
         locationManager.startUpdatingLocation()
     }
+    
+    // 지도 이동 종료 시 호출 (NMFMapViewCameraDelegate 채택) (임시적으로 사용 안함)
+//    func mapViewCameraIdle(_ mapView: NMFMapView) {
+//        // 현재 카메라 위치
+//        let cameraPosition = mapView.cameraPosition
+//        
+//        // 외부 전달
+//        onCameraIdle?(cameraPosition)
+//    }
 
     // MARK: - CLLocationManagerDelegate
-    
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.first else { return }
         let coordinate = location.coordinate

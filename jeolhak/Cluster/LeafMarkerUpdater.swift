@@ -42,10 +42,15 @@ class LeafMarkerUpdater: NMCDefaultLeafMarkerUpdater {
                 // 가게 데이터 콜백
                 self.bottomCardView?.showSelectedStore(store, targetTop: 480)
                 
+//                marker.width = 38
+//                marker.height = 41
+                
                 // 개별 마커 위치로 지도 카메라 이동
                 let latLng = NMGLatLng(lat: store.lat, lng: store.lng)
                 let cameraUpdate = NMFCameraUpdate(scrollTo: latLng, zoomTo: 16)
                 cameraUpdate.animation = .easeIn
+                // 콘텐츠 패딩 지정
+                //MapManager.shared.mapView?.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 200, right: 0)
                 MapManager.shared.mapView?.moveCamera(cameraUpdate)
                 
                 return true
