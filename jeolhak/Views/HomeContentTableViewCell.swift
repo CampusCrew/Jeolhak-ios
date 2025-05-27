@@ -27,6 +27,9 @@ class HomeContentTableViewCell: UITableViewCell {
         }
     }
     
+    // 가게 이름 탭 클로저
+    var onTitleTapped: (() -> Void)?
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupViews()
@@ -52,6 +55,11 @@ class HomeContentTableViewCell: UITableViewCell {
         shopTitleLabel.font = UIFont(name: "Jua-Regular", size: 16)
         shopTitleLabel.textColor = .black
         shopTitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        // 가게 이름 탭 제스처 연결
+        shopTitleLabel.isUserInteractionEnabled = true
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(titleTapped))
+        shopTitleLabel.addGestureRecognizer(tapGesture)
         
         // 가게 분류
         shopCategoryLabel.font = UIFont(name: "Jua-Regular", size: 14)
@@ -114,6 +122,11 @@ class HomeContentTableViewCell: UITableViewCell {
             line.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
             line.heightAnchor.constraint(equalToConstant: 1)
         ])
+    }
+    
+    // 탭 제스처 정의
+    @objc private func titleTapped() {
+        onTitleTapped?()
     }
     
     // MARK: - 뷰 설정

@@ -10,6 +10,7 @@
  */
 /** 하단 카드 뷰 생성 클래스  */
 import UIKit
+import NMapsMap
 
 class BottomCardView: UIView {
     
@@ -364,6 +365,19 @@ extension BottomCardView: UITableViewDataSource, UITableViewDelegate {
             shopContent: descriptionText,
             shopFavorite: false
         )
+        
+        // 가게 제목 탭 이벤트
+        cell.onTitleTapped = { [weak self] in
+            guard let self = self else { return }
+            
+            self.showSelectedStore(store, targetTop: 480)
+
+            // 개별 마커 위치로 지도 카메라 이동
+            let latLng = NMGLatLng(lat: store.lat, lng: store.lng)
+            let cameraUpdate = NMFCameraUpdate(scrollTo: latLng, zoomTo: 16)
+            cameraUpdate.animation = .easeIn
+            MapManager.shared.mapView?.moveCamera(cameraUpdate)
+        }
         
         return cell
     }
