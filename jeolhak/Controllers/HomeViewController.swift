@@ -241,8 +241,10 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
                 }
                 // 마커 호출
                 self.displaySetMarker(storeResponse.data, mapContainerView)
+                // 기존 가게 백업 삭제
+                self.bottomCardView.clearOriginalStores()
                 // 카드뷰 리스트 업데이트
-                self.bottomCardView.updateStores(storeResponse.data)
+                self.bottomCardView.updateStores(storeResponse.data, keepOriginal: false)
                 print("✅ bottomCardView 상태: \(String(describing: self.bottomCardView))")
             case .failure(let error):
                 print("오류 발생", error)

@@ -340,6 +340,11 @@ class BottomCardView: UIView {
             tableView.backgroundView = nil
         }
     }
+    
+    // 원본 가게 백업 삭제
+    func clearOriginalStores() {
+        originalStores.removeAll()
+    }
 }
 
 // MARK: - 카드뷰 확장 (DataSource, Delegate 설정)
