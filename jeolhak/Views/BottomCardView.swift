@@ -288,6 +288,8 @@ class BottomCardView: UIView {
         parentView.layoutIfNeeded()
         
         isCardViewOpen = false
+        // 카드 닫힘 전달
+        NotificationCenter.default.post(name: .didCloseCardView, object: nil)
         
         if let passThroughView = backgroundView as? TransparentPassThroughView {
             passThroughView.shouldReceiveTouch = false

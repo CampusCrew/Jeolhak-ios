@@ -7,14 +7,25 @@
 
 import NMapsMap
 
+// MARK: - 개별 마커 세팅
+
 class LeafMarkerUpdater: NMCDefaultLeafMarkerUpdater {
     var stores: [Store] = []
     
     // BottomCardView 참조
     weak var bottomCardView: BottomCardView?
     
+    // 선택된 마커 임시 저장
+    private var selectedMarker: NMFMarker?
+    
     // 마커 클릭 호출 클로저
     var onMarkerTapped: ((Store) -> Void)?
+    
+    override init() {
+        super.init()
+        // 카드 뷰 닫힐 때 마커 크기 복원
+        NotificationCenter.default.addObserver(self, selector: #selector(handleCardViewClosed), name: .didCloseCardView, object: nil)
+    }
     
     override func updateLeafMarker(_ info: NMCLeafMarkerInfo, _ marker: NMFMarker) {
         super.updateLeafMarker(info, marker)
@@ -25,7 +36,7 @@ class LeafMarkerUpdater: NMCDefaultLeafMarkerUpdater {
         
         marker.iconImage = NMFOverlayImage(image: UIImage(named: markerType.imageName)!)
         marker.width = 28
-        marker.height = 31
+        marker.height = 29
         
         marker.captionText = ""
         
@@ -39,11 +50,22 @@ class LeafMarkerUpdater: NMCDefaultLeafMarkerUpdater {
             marker.touchHandler = { [weak self] (overlay: NMFOverlay) -> Bool in
                 guard let self = self else { return false }
                 
+                // 기존 마커 크기 복원
+                self.selectedMarker?.width = 28
+                self.selectedMarker?.height = 29
+                
+                // 터치된 마커 확대 (강조)
+                marker.width = 48
+                marker.height = 50
+                
+                // 현재 마커 상태 저장
+                self.selectedMarker = marker
+                
                 // 가게 데이터 콜백
                 self.bottomCardView?.showSelectedStore(store, targetTop: 480)
                 
-//                marker.width = 38
-//                marker.height = 41
+                //                marker.width = 38
+                //                marker.height = 41
                 
                 // 개별 마커 위치로 지도 카메라 이동
                 let latLng = NMGLatLng(lat: store.lat, lng: store.lng)
@@ -56,5 +78,16 @@ class LeafMarkerUpdater: NMCDefaultLeafMarkerUpdater {
                 return true
             }
         }
+    }
+    
+    @objc private func handleCardViewClosed() {
+        // 선택된 마커 크기 원상복구
+        selectedMarker?.width = 28
+        selectedMarker?.height = 29
+        selectedMarker = nil
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 }

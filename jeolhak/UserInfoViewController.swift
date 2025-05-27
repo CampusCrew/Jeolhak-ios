@@ -214,7 +214,3 @@ class UserInfoViewController: UIViewController, UIPickerViewDelegate, UIPickerVi
         }
     }
 }
-
-extension Notification.Name {
-    static let didUpdateUserSelection = Notification.Name("didUpdateUserSelection")
-}
