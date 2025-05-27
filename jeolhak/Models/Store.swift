@@ -28,6 +28,8 @@ struct Store: Decodable {
     
     // 가게 이름
     let name: String
+    // 가게 주소
+    let address: String
     // 가게 위도 (latitude)
     let lat: Double
     // 가게 경도 (longitude)
@@ -46,6 +48,7 @@ struct Store: Decodable {
     // 서버의 응답 매핑 (ex : Server -> latitude, Swift -> lat 이걸 일치하게)
     enum CodingKeys: String, CodingKey {
         case name
+        case address
         case lat = "latitude"
         case lng = "longitude"
         case category

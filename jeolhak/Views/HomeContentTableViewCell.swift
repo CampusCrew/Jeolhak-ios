@@ -17,6 +17,7 @@ class HomeContentTableViewCell: UITableViewCell {
     // MARK: - UI 초기화
     private var shopImageView = UIImageView()
     private var shopTitleLabel = UILabel()
+    private var shopAddressLabel = UILabel()
     private var shopCategoryLabel = UILabel()
     private var shopContentLabel = UILabel()
     private var favoriteButton = UIButton()
@@ -56,6 +57,11 @@ class HomeContentTableViewCell: UITableViewCell {
         shopTitleLabel.textColor = .black
         shopTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         
+        // 가게 주소
+        shopAddressLabel.font = UIFont(name: "Jua-Regular", size: 11)
+        shopAddressLabel.textColor = .lightGray
+        shopAddressLabel.translatesAutoresizingMaskIntoConstraints = false
+        
         // 가게 이름 탭 제스처 연결
         shopTitleLabel.isUserInteractionEnabled = true
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(titleTapped))
@@ -83,7 +89,7 @@ class HomeContentTableViewCell: UITableViewCell {
         
         updateFavoriteIcon()
         
-        [shopImageView, shopTitleLabel, shopCategoryLabel, shopContentLabel, favoriteButton, line].forEach {
+        [shopImageView, shopTitleLabel, shopAddressLabel, shopCategoryLabel, shopContentLabel, favoriteButton, line].forEach {
             contentView.addSubview($0)
         }
         
@@ -98,6 +104,10 @@ class HomeContentTableViewCell: UITableViewCell {
             // 가게 이름
             shopTitleLabel.topAnchor.constraint(equalTo: shopImageView.bottomAnchor, constant: 8),
             shopTitleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
+            
+            // 가게 주소
+            shopAddressLabel.centerYAnchor.constraint(equalTo: shopTitleLabel.centerYAnchor),
+            shopAddressLabel.leadingAnchor.constraint(equalTo: shopCategoryLabel.trailingAnchor, constant: 10),
             
             // 가게 분류
             shopCategoryLabel.centerYAnchor.constraint(equalTo: shopTitleLabel.centerYAnchor),
@@ -131,12 +141,13 @@ class HomeContentTableViewCell: UITableViewCell {
     
     // MARK: - 뷰 설정
     // 생성자로 받아온 뷰 초기화
-    func configure(shopImage: String, shopTitle: String, shopCategory: String, shopContent: String, shopFavorite: Bool){
+    func configure(shopImage: String, shopTitle: String, shopAddress: String, shopCategory: String, shopContent: String, shopFavorite: Bool){
         // 이미지 Kingfisher 사용
         let cornerImageProcessor = RoundCornerImageProcessor(cornerRadius: 20)
         shopImageView.kf.indicatorType = .activity
         shopImageView.kf.setImage(with: URL(string: shopImage), options: [.transition(.fade(0.5)), .processor(cornerImageProcessor)])
         shopTitleLabel.text = shopTitle
+        shopAddressLabel.text = shopAddress
         shopCategoryLabel.text = shopCategory
         shopContentLabel.text = shopContent
         isFavorite = shopFavorite

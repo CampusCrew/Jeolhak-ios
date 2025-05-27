@@ -366,6 +366,7 @@ extension BottomCardView: UITableViewDataSource, UITableViewDelegate {
         cell.configure(
             shopImage: store.imageURL,
             shopTitle: store.name,
+            shopAddress: store.address,
             shopCategory: store.category ?? "기타",
             shopContent: descriptionText,
             shopFavorite: false
