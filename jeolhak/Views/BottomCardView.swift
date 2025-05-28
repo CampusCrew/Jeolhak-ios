@@ -36,6 +36,9 @@ class BottomCardView: UIView {
     // 카드 뷰 열림(true), 닫힘(false) 판단 (기본값 : 닫힘, false)
     private var isCardViewOpen: Bool = false
     
+    // 전체 가게 출력 모드 (true, default), 개별 가게 출력 모드 (false)
+    private var isAllShopListViewCheck: Bool = true
+    
     // store 목록 백업
     private var originalStores: [Store] = []
     
@@ -263,14 +266,14 @@ class BottomCardView: UIView {
     }
     
     /** 카드 뷰를 사용하는 부모 뷰의 배경색 변경 */
-//    private func updateBackgroundOpacity() {
-//        let currentTop = topConstraint.constant
-//        let collapsedTop = parentView.frame.height - minCardViewHeight
-//        let expandedTop = maxCardViewHeight
-//        
-//        let ratio = 1 - ((currentTop - expandedTop) / (collapsedTop - expandedTop))
-//        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.3 * ratio)
-//    }
+    //    private func updateBackgroundOpacity() {
+    //        let currentTop = topConstraint.constant
+    //        let collapsedTop = parentView.frame.height - minCardViewHeight
+    //        let expandedTop = maxCardViewHeight
+    //
+    //        let ratio = 1 - ((currentTop - expandedTop) / (collapsedTop - expandedTop))
+    //        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.3 * ratio)
+    //    }
     
     // 퍼블릭 인터페이스 : 외부에서 BottomCardView 상태 제어
     /** 카드뷰가 최대로 올라갈 수 있는 위치 설정
@@ -287,7 +290,10 @@ class BottomCardView: UIView {
         topConstraint.constant = collapsedTop
         parentView.layoutIfNeeded()
         
+        // 카드 뷰 닫힘
         isCardViewOpen = false
+        // 카드 뷰 닫히면 전체 가게 출력으로 변경
+        isAllShopListViewCheck = true
         // 카드 닫힘 전달
         NotificationCenter.default.post(name: .didCloseCardView, object: nil)
         
@@ -376,17 +382,32 @@ extension BottomCardView: UITableViewDataSource, UITableViewDelegate {
         
         // 가게 제목 탭 이벤트
         cell.onTitleTapped = { [weak self] in
-            guard let self = self else { return }
+            guard let self = self,
+                  let parentVC = self.parentViewController else { return }
             
-            self.showSelectedStore(store, targetTop: 480)
-
-            // 개별 마커 위치로 지도 카메라 이동
-            let latLng = NMGLatLng(lat: store.lat, lng: store.lng)
-            let cameraUpdate = NMFCameraUpdate(scrollTo: latLng, zoomTo: 16)
-            cameraUpdate.animation = .easeIn
-            MapManager.shared.mapView?.moveCamera(cameraUpdate)
+            print("가게 제목 탭")
+            
+            // 전체 가게 출력 모드일 때 (true)
+            if isAllShopListViewCheck {
+                self.showSelectedStore(store, targetTop: 480)
+                
+                // 개별 마커 위치로 지도 카메라 이동
+                let latLng = NMGLatLng(lat: store.lat, lng: store.lng)
+                let cameraUpdate = NMFCameraUpdate(scrollTo: latLng, zoomTo: 16)
+                cameraUpdate.animation = .easeIn
+                MapManager.shared.mapView?.moveCamera(cameraUpdate)
+            } else { // 개별 가게 출력 모드일 때 (false)
+                let testVC = StoreViewController()
+                let transition = CATransition()
+                transition.duration = 0.3
+                transition.type = .push
+                transition.subtype = .fromRight
+                transition.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                
+                parentVC.navigationController?.view.layer.add(transition, forKey: kCATransition)
+                parentVC.navigationController?.pushViewController(testVC, animated: false)
+            }
         }
-        
         return cell
     }
 }
@@ -421,6 +442,9 @@ extension BottomCardView {
             completion: { _ in
                 // 카드뷰 열림 상태로 설정
                 self.isCardViewOpen = true
+                
+                // 카드 뷰 모드 변경 (개별 가게 모드)
+                self.isAllShopListViewCheck = false
                 
                 // 배경 터치 허용
                 if let passThroughView = self.backgroundView as? TransparentPassThroughView {

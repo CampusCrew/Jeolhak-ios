@@ -42,6 +42,12 @@ struct Store: Decodable {
     let major: String
     // 할인 대상 : 단과대학 단위
     let department: String
+    // 할인 정보
+    let saleInfo: String
+    // 할인 기간
+    let saleDate: String
+    // 기타 설명
+    let etc: String
     // 가게 대표 사진
     let imageURL: String
     
@@ -55,6 +61,9 @@ struct Store: Decodable {
         case description
         case major
         case department
+        case saleInfo
+        case saleDate
+        case etc
         case imageURL
     }
 }
