@@ -396,8 +396,9 @@ extension BottomCardView: UITableViewDataSource, UITableViewDelegate {
                 let cameraUpdate = NMFCameraUpdate(scrollTo: latLng, zoomTo: 16)
                 cameraUpdate.animation = .easeIn
                 MapManager.shared.mapView?.moveCamera(cameraUpdate)
-            } else { // 개별 가게 출력 모드일 때 (false)
-                let testVC = StoreViewController()
+            } else {
+                // 개별 가게 출력 모드일 때 (false) 개별 가게 상세 페이지 이동
+                let storeVC = StoreViewController(store: store)
                 let transition = CATransition()
                 transition.duration = 0.3
                 transition.type = .push
@@ -405,7 +406,7 @@ extension BottomCardView: UITableViewDataSource, UITableViewDelegate {
                 transition.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
                 
                 parentVC.navigationController?.view.layer.add(transition, forKey: kCATransition)
-                parentVC.navigationController?.pushViewController(testVC, animated: false)
+                parentVC.navigationController?.pushViewController(storeVC, animated: false)
             }
         }
         return cell
