@@ -79,7 +79,9 @@ class StoreDetailView: UIView {
         saleDateTitle.font = UIFont(name: "Jua-Regular", size: 20)
         saleDateTitle.textColor = .black
         
-        saleDate.text = store.saleDate
+        // 날짜 형식 변환 유틸리티
+        let formatted = DateFormatterUtils.formatSaleDate(store.saleDate)
+        saleDate.text = formatted
         saleDate.font = UIFont(name: "Jua-Regular", size: 18)
         saleDate.textColor = .darkGray
         
