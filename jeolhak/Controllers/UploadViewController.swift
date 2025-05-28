@@ -7,27 +7,35 @@
 
 import UIKit
 
+// MARK: - 할인 가게 등록 페이지
+
 class UploadViewController: UIViewController {
     
     override func viewDidLoad() {
-        view.backgroundColor = .clear
-        
-        // 상단 제목
-        let title = setTitle()
-        view.addSubview(title)
-        
-        // 하단 입력 컨테이너
+        super.viewDidLoad()
+        view.backgroundColor = .white
+        setupLayout()
     }
     
-    // 상단 타이틀 정의
-    private func setTitle() -> UIView {
-        let label = UILabel()
-        label.text = "할인 매장 등록"
-        label.font = UIFont(name: "Jua-Reqular", size: 24)
-        label.textColor = .mainPink
+    private func setupLayout() {
+        let titleLabel = UILabel()
+        titleLabel.text = "할인 정보 등록"
+        titleLabel.font = UIFont(name: "Jua-Regular", size: 24)
+        titleLabel.textColor = .mainPink
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(titleLabel)
         
-        label.translatesAutoresizingMaskIntoConstraints = false
+        let formView = UploadFormView()
+        formView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(formView)
         
-        return label
+        NSLayoutConstraint.activate([
+            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
+            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            
+            formView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 10),
+            formView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            formView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24)
+        ])
     }
 }

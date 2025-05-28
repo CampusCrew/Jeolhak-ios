@@ -104,6 +104,11 @@ class StoreDetailView: UIView {
         etc.textColor = .darkGray
         etc.numberOfLines = 0
         
+        [divider1, divider2, divider3, divider4].forEach {
+            $0.backgroundColor = .systemGray
+            $0.layer.cornerRadius = 2
+        }
+        
         [shopImage, shopName, shopCategory, locationIcon, shopAddress,
          divider1, saleInfoTitle, saleInfo,
          divider2, saleDateTitle, saleDate,
