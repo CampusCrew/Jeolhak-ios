@@ -18,6 +18,13 @@ class UploadFormView: UIView, UITextFieldDelegate {
     // 텍스트 필드 배열
     private var textFields: [UITextField] = []
     
+    // 가게 주소 입력 버튼 콜백
+    var onMapButtonTapped: (() -> Void)?
+    // 할인 대상 입력 버튼 콜백
+    var onTargetButtonTapped: (() -> Void)?
+    // 할인 기간 입력 버튼 콜백
+    var onSaleDateButtonTapped: (() -> Void)?
+    
     // 초기화
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -64,7 +71,7 @@ class UploadFormView: UIView, UITextFieldDelegate {
         [
             makeField(title: "가게 이름", placeholder: "예) 모쿠모쿠"),
             makeField(title: "가게 주소", placeholder: "예) 익산시 무왕로 18-1길"),
-            makeField(title: "할인 대상", placeholder: "예) 원대 학생증 소지자"),
+            makeField(title: "할인 대상", placeholder: "예) 창의공과대학 컴퓨터소프트웨어공학과"),
             makeField(title: "할인 정보", placeholder: "예) 30,000원 이상 결제 시 10% 할인"),
             makeField(title: "할인 기간", placeholder: "예) 6월 1일 ~ 7월 10일"),
             makeField(title: "기타 사항", placeholder: "예) 클리커 지참 필수"),
@@ -133,33 +140,96 @@ class UploadFormView: UIView, UITextFieldDelegate {
         titleLabel.font = UIFont(name: "Jua-Regular", size: 16)
         titleLabel.textColor = .mainPink
         
+        // 가로 배치
+        let fieldRow = UIStackView()
+        fieldRow.axis = .horizontal // 수평 배치 (왼쪽에서 오른쪽으로 순서대로 arrangedSubView 배치)
+        fieldRow.spacing = 8 // arrangedSubView 사이의 간격
+        fieldRow.alignment = .fill // arrangedSubView의 높이 맞추기
+        
         let textField = UITextField()
         textField.delegate = self
-        textField.font = UIFont(name: "Jua-Regular", size: 16)
+        textField.font = UIFont(name: "Jua-Regular", size: 13)
         textField.textColor = .black
         textField.borderStyle = .none
         textField.layer.borderWidth = 1
         textField.layer.borderColor = UIColor.mainPink.cgColor
         textField.layer.cornerRadius = 8
-        textField.setLeftPaddingPoints(12)
-        textField.setRightPaddingPoints(12)
-        textField.heightAnchor.constraint(equalToConstant: 44).isActive = true
+        textField.setLeftPaddingPoints(8)
+        textField.setRightPaddingPoints(8)
+        textField.heightAnchor.constraint(equalToConstant: 42).isActive = true // 제약조건 추가
         textField.returnKeyType = .next
         
         textField.attributedPlaceholder = NSAttributedString(
             string: placeholder,
             attributes: [
                 .foregroundColor: UIColor.gray,
-                .font: UIFont(name: "Jua-Regular", size: 16)!
+                .font: UIFont(name: "Jua-Regular", size: 13)!
             ]
         )
         
         textFields.append(textField)
         
+        if title == "가게 주소" {
+            // 가게 주소 입력 버튼 추가
+            let mapButton = UIButton(type: .system)
+            let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .medium)
+            let icon = UIImage(systemName: "map", withConfiguration: config)
+            mapButton.setImage(icon, for: .normal)
+            mapButton.tintColor = .mainPink
+            mapButton.addTarget(self, action: #selector(handleMapButtonTapped), for: .touchUpInside)
+            mapButton.widthAnchor.constraint(equalToConstant: 36).isActive = true // 제약조건 추가
+            
+            fieldRow.addArrangedSubview(textField) // 수평, 좌측 배치
+            fieldRow.addArrangedSubview(mapButton) // 수평, 우측 배치
+        } else if title == "할인 대상"{
+            // 할인 대상 입력 버튼 추가
+            let capButton = UIButton(type: .system)
+            let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .medium)
+            let icon = UIImage(systemName: "graduationcap", withConfiguration: config)
+            capButton.setImage(icon, for: .normal)
+            capButton.tintColor = .mainPink
+            capButton.addTarget(self, action: #selector(handleTargetButtonTapped), for: .touchUpInside)
+            capButton.widthAnchor.constraint(equalToConstant: 36).isActive = true
+            
+            fieldRow.addArrangedSubview(textField)
+            fieldRow.addArrangedSubview(capButton)
+        } else if title == "할인 기간" {
+            let calendarButton = UIButton(type: .system)
+            let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .medium)
+            let icon = UIImage(systemName: "calendar", withConfiguration: config)
+            calendarButton.setImage(icon, for: .normal)
+            calendarButton.tintColor = .mainPink
+            calendarButton.addTarget(self, action: #selector(handleSaleInfoButtonTapped), for: .touchUpInside)
+            calendarButton.widthAnchor.constraint(equalToConstant: 36).isActive = true
+            
+            fieldRow.addArrangedSubview(textField)
+            fieldRow.addArrangedSubview(calendarButton)
+        } else {
+            fieldRow.addArrangedSubview(textField)
+        }
+        
         container.addArrangedSubview(titleLabel)
-        container.addArrangedSubview(textField)
+        container.addArrangedSubview(fieldRow)
         
         return container
+    }
+    
+    // 가게 주소 입력 버튼 클릭 핸들러
+    @objc private func handleMapButtonTapped() {
+        print("가게 주소 입력 버튼 클릭")
+        onMapButtonTapped?()
+    }
+    
+    // 할인 대상 입력 버튼 클릭 핸들러
+    @objc private func handleTargetButtonTapped() {
+        print("할인 대상 입력 버튼 클릭")
+        onTargetButtonTapped?()
+    }
+    
+    // 할인 기간 입력 버튼 클릭 핸들러
+    @objc private func handleSaleInfoButtonTapped() {
+        print("할인 기간 입력 버튼 클릭")
+        onSaleDateButtonTapped?()
     }
     
     // 키보드 엔터 처리

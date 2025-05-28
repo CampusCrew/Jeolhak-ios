@@ -33,9 +33,9 @@ class UploadViewController: UIViewController {
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
-            formView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 10),
-            formView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            formView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24)
+            formView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 5),
+            formView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            formView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
         ])
     }
 }
