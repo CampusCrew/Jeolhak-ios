@@ -42,6 +42,9 @@ class BottomCardView: UIView {
     // store 목록 백업
     private var originalStores: [Store] = []
     
+    // 마지막으로 선택한 store 저장
+    private var lastSelectedStore: Store?
+    
     // 외부에서 정의 가능한 콜백 함수 정의
     // BottomCardView 안에서 제스처가 발생했을 때 외부에 알리기 위한 이벤트 트리거
     // (() -> Void)? : 아무 인자도 받지 않고, 아무것도 반환하지 않는 클로저 타입 (옵셔널)
@@ -202,11 +205,6 @@ class BottomCardView: UIView {
             if newTop >= expandedTop && newTop <= collapsedTop {
                 // 현재 카드뷰가 상하 한계 범위에 있으면 카드뷰 이동
                 topConstraint.constant = newTop
-                /*
-                 
-                 현재 카드뷰 위치(newTop) : 480.7681884765625
-                 현재 카드뷰 좌표(translation) : (0.0, -0.2340087890625)
-                 */
                 //updateBackgroundOpacity()
                 // 다음 제스쳐를 계산하기 위해 움직인 값 초기화
                 gesture.setTranslation(.zero, in: parentView)
@@ -218,6 +216,25 @@ class BottomCardView: UIView {
             // 손가락을 위로 쓸었으면(true) 카드뷰를 위로 올리기
             // 손가락을 아래로 쓸었으면(false) 카드뷰를 아래로 내리기
             let shouldExpand = velocity.y < 0
+            
+            // 개별 가게 보기 상태에서 위로 제스처 시 StoreVC로 이동
+            if shouldExpand && !isAllShopListViewCheck, let store = lastSelectedStore,
+               let parentVC = parentViewController {
+                let storeVC = StoreViewController(store: store)
+                let transition = CATransition()
+                transition.duration = 0.3
+                transition.type = .moveIn
+                transition.subtype = .fromTop
+                transition.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                
+                parentVC.navigationController?.view.layer.add(transition, forKey: kCATransition)
+                parentVC.navigationController?.pushViewController(storeVC, animated: false)
+                
+                // 중복 방지를 위해 nil로 초기화
+                lastSelectedStore = nil
+                
+                return
+            }
             // 애니메이션 진행
             animate(expand: shouldExpand)
         default:
@@ -294,6 +311,8 @@ class BottomCardView: UIView {
         isCardViewOpen = false
         // 카드 뷰 닫히면 전체 가게 출력으로 변경
         isAllShopListViewCheck = true
+        // 상태 초기화
+        lastSelectedStore = nil
         // 카드 닫힘 전달
         NotificationCenter.default.post(name: .didCloseCardView, object: nil)
         
@@ -401,8 +420,8 @@ extension BottomCardView: UITableViewDataSource, UITableViewDelegate {
                 let storeVC = StoreViewController(store: store)
                 let transition = CATransition()
                 transition.duration = 0.3
-                transition.type = .push
-                transition.subtype = .fromRight
+                transition.type = .moveIn
+                transition.subtype = .fromTop
                 transition.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
                 
                 parentVC.navigationController?.view.layer.add(transition, forKey: kCATransition)
@@ -460,6 +479,7 @@ extension BottomCardView {
     
     // 마커 클릭 시 단일 Store 정보 출력
     func showSelectedStore(_ store: Store, targetTop: CGFloat = 480) {
+        lastSelectedStore = store
         showCardForMarker(targetTop: targetTop, selectedStore: store)
     }
     
