@@ -140,12 +140,6 @@ class UploadFormView: UIView, UITextFieldDelegate {
         titleLabel.font = UIFont(name: "Jua-Regular", size: 16)
         titleLabel.textColor = .mainPink
         
-        // 가로 배치
-        let fieldRow = UIStackView()
-        fieldRow.axis = .horizontal // 수평 배치 (왼쪽에서 오른쪽으로 순서대로 arrangedSubView 배치)
-        fieldRow.spacing = 8 // arrangedSubView 사이의 간격
-        fieldRow.alignment = .fill // arrangedSubView의 높이 맞추기
-        
         let textField = UITextField()
         textField.delegate = self
         textField.font = UIFont(name: "Jua-Regular", size: 13)
@@ -155,8 +149,8 @@ class UploadFormView: UIView, UITextFieldDelegate {
         textField.layer.borderColor = UIColor.mainPink.cgColor
         textField.layer.cornerRadius = 8
         textField.setLeftPaddingPoints(8)
-        textField.setRightPaddingPoints(8)
-        textField.heightAnchor.constraint(equalToConstant: 42).isActive = true // 제약조건 추가
+        textField.setRightPaddingPoints(36) // 버튼이 위치할 오른쪽 버튼 영역 확보
+        textField.heightAnchor.constraint(equalToConstant: 42).isActive = true
         textField.returnKeyType = .next
         
         textField.attributedPlaceholder = NSAttributedString(
@@ -169,47 +163,39 @@ class UploadFormView: UIView, UITextFieldDelegate {
         
         textFields.append(textField)
         
+        // 아이콘 버튼을 텍스트 필드 내부에 추가
         if title == "가게 주소" {
-            // 가게 주소 입력 버튼 추가
-            let mapButton = UIButton(type: .system)
-            let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .medium)
-            let icon = UIImage(systemName: "map", withConfiguration: config)
-            mapButton.setImage(icon, for: .normal)
-            mapButton.tintColor = .mainPink
-            mapButton.addTarget(self, action: #selector(handleMapButtonTapped), for: .touchUpInside)
-            mapButton.widthAnchor.constraint(equalToConstant: 36).isActive = true // 제약조건 추가
-            
-            fieldRow.addArrangedSubview(textField) // 수평, 좌측 배치
-            fieldRow.addArrangedSubview(mapButton) // 수평, 우측 배치
-        } else if title == "할인 대상"{
-            // 할인 대상 입력 버튼 추가
-            let capButton = UIButton(type: .system)
-            let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .medium)
-            let icon = UIImage(systemName: "graduationcap", withConfiguration: config)
-            capButton.setImage(icon, for: .normal)
-            capButton.tintColor = .mainPink
-            capButton.addTarget(self, action: #selector(handleTargetButtonTapped), for: .touchUpInside)
-            capButton.widthAnchor.constraint(equalToConstant: 36).isActive = true
-            
-            fieldRow.addArrangedSubview(textField)
-            fieldRow.addArrangedSubview(capButton)
+            textField.rightView = makeIconButton(systemName: "map", action: #selector(handleMapButtonTapped))
+            textField.rightViewMode = .always
+        } else if title == "할인 대상" {
+            textField.rightView = makeIconButton(systemName: "graduationcap", action: #selector(handleTargetButtonTapped))
+            textField.rightViewMode = .always
         } else if title == "할인 기간" {
-            let calendarButton = UIButton(type: .system)
-            let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .medium)
-            let icon = UIImage(systemName: "calendar", withConfiguration: config)
-            calendarButton.setImage(icon, for: .normal)
-            calendarButton.tintColor = .mainPink
-            calendarButton.addTarget(self, action: #selector(handleSaleInfoButtonTapped), for: .touchUpInside)
-            calendarButton.widthAnchor.constraint(equalToConstant: 36).isActive = true
-            
-            fieldRow.addArrangedSubview(textField)
-            fieldRow.addArrangedSubview(calendarButton)
-        } else {
-            fieldRow.addArrangedSubview(textField)
+            textField.rightView = makeIconButton(systemName: "calendar", action: #selector(handleSaleInfoButtonTapped))
+            textField.rightViewMode = .always
         }
         
         container.addArrangedSubview(titleLabel)
-        container.addArrangedSubview(fieldRow)
+        container.addArrangedSubview(textField)
+        
+        return container
+    }
+    
+    // 버튼 생성
+    private func makeIconButton(systemName: String, action: Selector) -> UIView {
+        let button = UIButton(type: .system)
+        let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .medium)
+        let image = UIImage(systemName: systemName, withConfiguration: config)
+        button.setImage(image, for: .normal)
+        button.tintColor = .mainPink
+        button.addTarget(self, action: action, for: .touchUpInside)
+        button.frame = CGRect(x: 0, y: 0, width: 36, height: 42) // 높이 textField와 맞춤
+        
+        // 패딩 wrapper
+        let container = UIView(frame: CGRect(x: 0, y: 0, width: 44, height: 42)) // 오른쪽에 8pt 여유
+        button.center = container.center
+        button.autoresizingMask = [.flexibleLeftMargin, .flexibleRightMargin, .flexibleTopMargin, .flexibleBottomMargin]
+        container.addSubview(button)
         
         return container
     }

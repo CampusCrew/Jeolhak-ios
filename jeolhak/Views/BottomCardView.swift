@@ -389,13 +389,13 @@ extension BottomCardView: UITableViewDataSource, UITableViewDelegate {
         }
         
         let store = stores[indexPath.row]
-        let descriptionText = (store.description?.isEmpty ?? true) ? "할인 내용이 들어갑니다." : store.description!
+        let storeSaleInfo = store.saleInfo == "" ? "할인 내용이 들어갑니다." : store.saleInfo
         cell.configure(
             shopImage: store.imageURL,
             shopTitle: store.name,
             shopAddress: store.address,
             shopCategory: store.category ?? "기타",
-            shopContent: descriptionText,
+            shopSaleInfo: storeSaleInfo,
             shopFavorite: false
         )
         

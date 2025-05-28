@@ -19,7 +19,7 @@ class HomeContentTableViewCell: UITableViewCell {
     private var shopTitleLabel = UILabel()
     private var shopAddressLabel = UILabel()
     private var shopCategoryLabel = UILabel()
-    private var shopContentLabel = UILabel()
+    private var shopSaleInfoLabel = UILabel()
     private var favoriteButton = UIButton()
     
     private var isFavorite: Bool = false {
@@ -73,10 +73,10 @@ class HomeContentTableViewCell: UITableViewCell {
         shopCategoryLabel.translatesAutoresizingMaskIntoConstraints = false
         
         // 가게 설명
-        shopContentLabel.font = UIFont(name: "Jua-Regular", size: 14)
-        shopContentLabel.textColor = .darkGray
-        shopContentLabel.numberOfLines = 2
-        shopContentLabel.translatesAutoresizingMaskIntoConstraints = false
+        shopSaleInfoLabel.font = UIFont(name: "Jua-Regular", size: 14)
+        shopSaleInfoLabel.textColor = .darkGray
+        shopSaleInfoLabel.numberOfLines = 2
+        shopSaleInfoLabel.translatesAutoresizingMaskIntoConstraints = false
         
         // 즐겨찾기
         favoriteButton.translatesAutoresizingMaskIntoConstraints = false
@@ -89,7 +89,7 @@ class HomeContentTableViewCell: UITableViewCell {
         
         updateFavoriteIcon()
         
-        [shopImageView, shopTitleLabel, shopAddressLabel, shopCategoryLabel, shopContentLabel, favoriteButton, line].forEach {
+        [shopImageView, shopTitleLabel, shopAddressLabel, shopCategoryLabel, shopSaleInfoLabel, favoriteButton, line].forEach {
             contentView.addSubview($0)
         }
         
@@ -120,13 +120,13 @@ class HomeContentTableViewCell: UITableViewCell {
             favoriteButton.heightAnchor.constraint(equalToConstant: 24),
             
             // 가게 설명
-            shopContentLabel.topAnchor.constraint(equalTo: shopTitleLabel.bottomAnchor, constant: 6),
-            shopContentLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
-            shopContentLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
-            shopContentLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12),
+            shopSaleInfoLabel.topAnchor.constraint(equalTo: shopTitleLabel.bottomAnchor, constant: 6),
+            shopSaleInfoLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
+            shopSaleInfoLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
+            shopSaleInfoLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12),
             
             // 하단 분류 선
-            line.topAnchor.constraint(equalTo: shopContentLabel.bottomAnchor, constant: 12),
+            line.topAnchor.constraint(equalTo: shopSaleInfoLabel.bottomAnchor, constant: 12),
             line.centerXAnchor.constraint(equalTo: centerXAnchor),
             line.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
             line.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
@@ -141,7 +141,7 @@ class HomeContentTableViewCell: UITableViewCell {
     
     // MARK: - 뷰 설정
     // 생성자로 받아온 뷰 초기화
-    func configure(shopImage: String, shopTitle: String, shopAddress: String, shopCategory: String, shopContent: String, shopFavorite: Bool){
+    func configure(shopImage: String, shopTitle: String, shopAddress: String, shopCategory: String, shopSaleInfo: String, shopFavorite: Bool){
         // 이미지 Kingfisher 사용
         let cornerImageProcessor = RoundCornerImageProcessor(cornerRadius: 20)
         shopImageView.kf.indicatorType = .activity
@@ -149,7 +149,7 @@ class HomeContentTableViewCell: UITableViewCell {
         shopTitleLabel.text = shopTitle
         shopAddressLabel.text = shopAddress
         shopCategoryLabel.text = shopCategory
-        shopContentLabel.text = shopContent
+        shopSaleInfoLabel.text = shopSaleInfo
         isFavorite = shopFavorite
     }
     
