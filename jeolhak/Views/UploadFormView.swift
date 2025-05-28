@@ -135,7 +135,6 @@ class UploadFormView: UIView, UITextFieldDelegate {
         
         let textField = UITextField()
         textField.delegate = self
-        textField.placeholder = placeholder
         textField.font = UIFont(name: "Jua-Regular", size: 16)
         textField.textColor = .black
         textField.borderStyle = .none
@@ -146,6 +145,14 @@ class UploadFormView: UIView, UITextFieldDelegate {
         textField.setRightPaddingPoints(12)
         textField.heightAnchor.constraint(equalToConstant: 44).isActive = true
         textField.returnKeyType = .next
+        
+        textField.attributedPlaceholder = NSAttributedString(
+            string: placeholder,
+            attributes: [
+                .foregroundColor: UIColor.gray,
+                .font: UIFont(name: "Jua-Regular", size: 16)!
+            ]
+        )
         
         textFields.append(textField)
         
