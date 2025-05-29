@@ -29,10 +29,6 @@ class BottomCardView: UIView {
     private var backgroundView: UIView!
     private unowned let parentView: UIView
     
-    // 어떤 뷰에서 카드뷰 호출인지 확인
-    // true : HomeView에서 호출, false : FavoriteView에서 호출
-    private var isHomeViewCheck: Bool
-    
     // 카드 뷰 열림(true), 닫힘(false) 판단 (기본값 : 닫힘, false)
     private var isCardViewOpen: Bool = false
     
@@ -51,11 +47,10 @@ class BottomCardView: UIView {
     var onPanChanged: (() -> Void)?
     
     // 커스텀 이니셜라이저
-    init(parentView: UIView, height: CGFloat, isHomeViewCheck: Bool) {
+    init(parentView: UIView, height: CGFloat) {
         // 인자로 받아온 부모 뷰를 활용
         self.parentView = parentView
         self.minCardViewHeight = height
-        self.isHomeViewCheck = isHomeViewCheck
         super.init(frame: .zero)
         translatesAutoresizingMaskIntoConstraints = false
         setupBackgroundView()
@@ -120,42 +115,22 @@ class BottomCardView: UIView {
             handle.heightAnchor.constraint(equalToConstant: 5)
         ])
         
-        // HomeVC에서 호출했을 때
-        if isHomeViewCheck {
-            tableView.translatesAutoresizingMaskIntoConstraints = false
-            tableView.backgroundColor = .white
-            tableView.separatorStyle = .none
-            tableView.showsVerticalScrollIndicator = false
-            tableView.dataSource = self
-            tableView.delegate = self
-            tableView.register(HomeContentTableViewCell.self, forCellReuseIdentifier: HomeContentTableViewCell.identifier)
-            
-            addSubview(tableView)
-            
-            NSLayoutConstraint.activate([
-                tableView.topAnchor.constraint(equalTo: handle.bottomAnchor, constant: 12),
-                tableView.leadingAnchor.constraint(equalTo: parentView.leadingAnchor, constant: 20),
-                tableView.trailingAnchor.constraint(equalTo: parentView.trailingAnchor, constant: -20),
-                tableView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -safeAreaInset())
-            ])
-            // FavoriteVC에서 호출했을 떄
-        } else {
-            //            let favoriteTestView = FavoriteContentItemView(
-            //                shopTitle: "GT커피 모현점",
-            //                shopCategory: "디저트",
-            //                shopLocation: "익산시 서동로 18길 42",
-            //                shopImage: "testImage",
-            //                shopFavorite: false
-            //            )
-            //
-            //            addSubview(favoriteTestView)
-            //
-            //            NSLayoutConstraint.activate([
-            //                favoriteTestView.topAnchor.constraint(equalTo: handle.topAnchor, constant: 15),
-            //                favoriteTestView.leadingAnchor.constraint(equalTo: parentView.leadingAnchor, constant: 20),
-            //                favoriteTestView.trailingAnchor.constraint(equalTo: parentView.trailingAnchor, constant: -20)
-            //            ])
-        }
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.backgroundColor = .white
+        tableView.separatorStyle = .none
+        tableView.showsVerticalScrollIndicator = false
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.register(HomeContentTableViewCell.self, forCellReuseIdentifier: HomeContentTableViewCell.identifier)
+        
+        addSubview(tableView)
+        
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: handle.bottomAnchor, constant: 12),
+            tableView.leadingAnchor.constraint(equalTo: parentView.leadingAnchor, constant: 20),
+            tableView.trailingAnchor.constraint(equalTo: parentView.trailingAnchor, constant: -20),
+            tableView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -safeAreaInset())
+        ])
         
         topConstraint = topAnchor.constraint(equalTo: parentView.topAnchor, constant: parentView.frame.height - minCardViewHeight)
         

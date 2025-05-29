@@ -72,10 +72,10 @@ class UploadFormView: UIView, UITextFieldDelegate {
             makeField(title: "가게 이름", placeholder: "예) 모쿠모쿠"),
             makeField(title: "가게 주소", placeholder: "예) 익산시 무왕로 18-1길"),
             makeField(title: "할인 대상", placeholder: "예) 창의공과대학 컴퓨터소프트웨어공학과"),
-            makeField(title: "할인 정보", placeholder: "예) 30,000원 이상 결제 시 10% 할인"),
             makeField(title: "할인 기간", placeholder: "예) 6월 1일 ~ 7월 10일"),
+            makeField(title: "할인 정보", placeholder: "예) 30,000원 이상 결제 시 10% 할인"),
             makeField(title: "기타 사항", placeholder: "예) 클리커 지참 필수"),
-            makeField(title: "가게 이미지", placeholder: "예) 추후 추가 예정")
+            makeField(title: "요청자", placeholder: "예) 컴퓨터소프트웨어공학과 학생회")
         ].forEach { stackView.addArrangedSubview($0) }
     }
     

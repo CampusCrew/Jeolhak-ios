@@ -16,14 +16,13 @@ import CoreLocation
 class MainTabBarController: UITabBarController {
     
     let homeVC = HomeViewController()
-    let favoriteVC = FavoriteViewController()
     let notifivationVC = NotificationViewController()
     let uploadVC = UploadViewController()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let controllers = [homeVC, favoriteVC, notifivationVC, uploadVC]
+        let controllers = [homeVC, notifivationVC, uploadVC]
         self.viewControllers = controllers.map{
             UINavigationController(rootViewController: $0)
         }
@@ -34,10 +33,9 @@ class MainTabBarController: UITabBarController {
     // 탭 바 설정
     func setTabBar() {
         // 기존 탭바 아이템 설정 그대로 유지
-        homeVC.tabBarItem = UITabBarItem(title: "홈", image: UIImage(systemName: "house"), tag: 0)
-        favoriteVC.tabBarItem = UITabBarItem(title: "즐겨찾기", image: UIImage(systemName: "star"), tag: 1)
-        notifivationVC.tabBarItem = UITabBarItem(title: "알림", image: UIImage(systemName: "bell"), tag: 2)
-        uploadVC.tabBarItem = UITabBarItem(title: "등록", image: UIImage(systemName: "plus"), tag: 3)
+        homeVC.tabBarItem = UITabBarItem(title: "홈", image: UIImage(systemName: "house"), tag: 1)
+        notifivationVC.tabBarItem = UITabBarItem(title: "알림", image: UIImage(systemName: "bell"), tag: 0)
+        uploadVC.tabBarItem = UITabBarItem(title: "등록", image: UIImage(systemName: "plus"), tag: 2)
         
         // 탭 바 appearance 설정
         let appearance = UITabBarAppearance()

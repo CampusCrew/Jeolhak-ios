@@ -143,7 +143,7 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         setupSearchBarAndUserInfo()
         
         // 하단 카드뷰 출력
-        bottomCardView = BottomCardView(parentView: self.view, height: 120, isHomeViewCheck: true)
+        bottomCardView = BottomCardView(parentView: self.view, height: 120)
     }
     
     @objc private func refreshAfterChange() {

@@ -7,7 +7,7 @@
 
 import Foundation
 
-// MARK: - Home View Controller의 TableView Cell 데이터 정의
+// MARK: - Home View Controller의 TableView Cell 데이터 정의 (미사용)
 struct HomeShopData {
     let imageName: String
     let title: String
