@@ -68,6 +68,15 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     
     // Foreground(앱 켜진 상태)에서도 알림 오는 설정
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        let content = notification.request.content
+        let title = content.title
+        let body = content.body
+        
+        // 알림 정보 NotificationVC로 전달
+        NotificationCenter.default.post(name: .didReceivePushNotification, object: nil, userInfo: [
+            "title": title,
+            "body": body
+        ])
         completionHandler([.list, .banner, .sound])
     }
 }

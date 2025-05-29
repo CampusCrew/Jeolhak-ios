@@ -15,4 +15,7 @@ extension Notification.Name {
     
     // 단과, 학과 변경 감지
     static let didUpdateUserSelection = Notification.Name("didUpdateUserSelection")
+    
+    // FCM 알람 수신 감지
+    static let didReceivePushNotification = Notification.Name("didReceivePushNotification")
 }
