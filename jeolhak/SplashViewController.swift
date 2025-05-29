@@ -31,6 +31,22 @@ class SplashViewController: UIViewController {
         let isFirstLaunch = !UserDefaults.standard.bool(forKey: "hasLaunchedBefore")
         
         if isFirstLaunch {
+            if let fcmToken = UserDefaults.standard.string(forKey: "fcmToken") {
+                let payload = FCMRegisterRequest(token: fcmToken, os: "ios")
+                NetworkManager.shared.requestPOST(
+                    urlString: APIConstants.postToken,
+                    parameters: payload
+                ) { (result: Result<FCMRegisterResponse, APIError>) in
+                    switch result {
+                    case .success(let response):
+                        print("✅ FCM 등록 성공: \(response)")
+                    case .failure(let error):
+                        print("❌ FCM 등록 실패: \(error)")
+                    }
+                }
+            } else {
+                print("❗ FCM 토큰이 없음")
+            }
             let userInfoVC = UserInfoViewController()
             userInfoVC.entryMode = .initialLaunch
             userInfoVC.modalPresentationStyle = .fullScreen

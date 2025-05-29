@@ -14,6 +14,13 @@ target 'jeolhak' do
   # Kingfisher
   pod 'Kingfisher'
 
+  # FCM (Notification)
+  pod 'Firebase/Messaging'
+  pod 'Firebase/Core'
+
+  # Add the Firebase pod for Google Analytics
+  pod 'FirebaseAnalytics'
+
   # Pods for jeolhak
 
   target 'jeolhakTests' do

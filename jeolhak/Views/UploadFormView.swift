@@ -209,7 +209,19 @@ class UploadFormView: UIView, UITextFieldDelegate {
     // 할인 대상 입력 버튼 클릭 핸들러
     @objc private func handleTargetButtonTapped() {
         print("할인 대상 입력 버튼 클릭")
-        onTargetButtonTapped?()
+        if let presentedVC = parentViewController?.presentedViewController as? UserInfoViewController {
+            presentedVC.dismiss(animated: true)
+        } else {
+            let userInfoVC = UserInfoViewController()
+            userInfoVC.entryMode = .uploadShop
+            
+            let triggerVC = DismissTriggerViewController(modal: userInfoVC)
+            triggerVC.modalPresentationStyle = .overFullScreen
+            triggerVC.modalTransitionStyle = .crossDissolve
+            
+            parentViewController?.present(triggerVC, animated: false)
+        }
+        // onTargetButtonTapped?()
     }
     
     // 할인 기간 입력 버튼 클릭 핸들러

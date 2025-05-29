@@ -12,4 +12,7 @@ enum APIConstants {
     
     // GET /stores
     static let getStores = baseURL + "/stores"
+    
+    // POST /notify
+    static let postToken = baseURL + "/notify"
 }
