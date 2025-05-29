@@ -209,13 +209,12 @@ class UploadFormView: UIView, UITextFieldDelegate {
     // 할인 대상 입력 버튼 클릭 핸들러
     @objc private func handleTargetButtonTapped() {
         print("할인 대상 입력 버튼 클릭")
-        if let presentedVC = parentViewController?.presentedViewController as? UserInfoViewController {
+        if let presentedVC = parentViewController?.presentedViewController as? StoreSelectTargetViewController {
             presentedVC.dismiss(animated: true)
         } else {
-            let userInfoVC = UserInfoViewController()
-            userInfoVC.entryMode = .uploadShop
+            let storeSelectTargetVC = StoreSelectTargetViewController()
             
-            let triggerVC = DismissTriggerViewController(modal: userInfoVC)
+            let triggerVC = DismissTriggerViewController(modal: storeSelectTargetVC)
             triggerVC.modalPresentationStyle = .overFullScreen
             triggerVC.modalTransitionStyle = .crossDissolve
             
@@ -263,3 +262,28 @@ extension UITextField {
         self.rightViewMode = .always
     }
 }
+
+/*
+ 요청
+ {
+   "name": "김밥천국", // 가게 이름
+   "address": "전라북도 익산시 익산대로 123", // 가게 주소
+   "partDivision" : "학과", // 단과대학과 학과 구분. ("학과" 혹은 "단과"만 전달)
+   // partDivision = "학과"일 시 "학과 명"만 전달
+   // partDivision = "단과"일 시 "단과대학 명"만 전달
+   "partName" : "컴퓨터소프트웨어공학과",
+   // partName + "재학생" or "휴학생" or "재학생/휴학생"
+   "saleTarget" : "컴퓨터소프트웨어공학과 재학생",
+   "saleInfo" : "10,000원 이상 결제 시 10% 할인",
+   // saleDate는 할인 기간을 의미.
+   // "상시" 혹은 "YYYY.MM.dd~YYYY.MM.dd" 형식으로 전달
+   "saleDate" : "2025.03.04~2025.12.31",
+   "etc" : "반드시 클리커가 있어야 할인 적용", // 할인에 해당하는 추가 설명 (자유형식)
+   "requester" : "컴공 학생회", // 자유 형식 (요청자)
+ }
+ 응답
+ {
+     "message": "가게 등록 성공"
+ }
+ 
+ */

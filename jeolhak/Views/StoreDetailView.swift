@@ -17,6 +17,9 @@ class StoreDetailView: UIView {
     private let shopCategory = UILabel()
     private let locationIcon = UIImageView()
     private let shopAddress = UILabel()
+    
+    private let divider = UIView()
+    
     private let saleInfoTitle = UILabel()
     private let saleInfo = UILabel()
     private let saleDateTitle = UILabel()
@@ -27,12 +30,12 @@ class StoreDetailView: UIView {
     private let etcTitle = UILabel()
     private let etc = UILabel()
     
-    private let divider1 = UIView()
-    private let divider2 = UIView()
-    private let divider3 = UIView()
-    private let divider4 = UIView()
+    private let mapButton = UIButton()
+    
+    private let store: Store
     
     init(store: Store) {
+        self.store = store
         super.init(frame: .zero)
         translatesAutoresizingMaskIntoConstraints = false
         backgroundColor = .white
@@ -66,9 +69,12 @@ class StoreDetailView: UIView {
         shopAddress.font = UIFont(name: "Jua-Regular", size: 18)
         shopAddress.textColor = .darkGray
         
+        divider.backgroundColor = .systemGray
+        divider.layer.cornerRadius = 2
+        
         saleInfoTitle.text = "할인 정보"
         saleInfoTitle.font = UIFont(name: "Jua-Regular", size: 20)
-        saleInfoTitle.textColor = .black
+        saleInfoTitle.textColor = .mainPink
         
         saleInfo.text = store.saleInfo
         saleInfo.font = UIFont(name: "Jua-Regular", size: 18)
@@ -77,7 +83,7 @@ class StoreDetailView: UIView {
         
         saleDateTitle.text = "할인 기간"
         saleDateTitle.font = UIFont(name: "Jua-Regular", size: 20)
-        saleDateTitle.textColor = .black
+        saleDateTitle.textColor = .mainPink
         
         // 날짜 형식 변환 유틸리티
         let formatted = DateFormatterUtils.formatSaleDate(store.saleDate)
@@ -87,7 +93,7 @@ class StoreDetailView: UIView {
         
         targetTitle.text = "할인 대상"
         targetTitle.font = UIFont(name: "Jua-Regular", size: 20)
-        targetTitle.textColor = .black
+        targetTitle.textColor = .mainPink
         
         shopDepartment.text = store.department
         shopDepartment.font = UIFont(name: "Jua-Regular", size: 18)
@@ -99,23 +105,26 @@ class StoreDetailView: UIView {
         
         etcTitle.text = "설명(기타)"
         etcTitle.font = UIFont(name: "Jua-Regular", size: 20)
-        etcTitle.textColor = .black
+        etcTitle.textColor = .mainPink
         
         etc.text = store.etc
         etc.font = UIFont(name: "Jua-Regular", size: 18)
         etc.textColor = .darkGray
         etc.numberOfLines = 0
         
-        [divider1, divider2, divider3, divider4].forEach {
-            $0.backgroundColor = .systemGray
-            $0.layer.cornerRadius = 2
-        }
+        mapButton.setTitle("네이버 지도에서 보기", for: .normal)
+        mapButton.setTitleColor(.white, for: .normal)
+        mapButton.backgroundColor = .mainPink
+        mapButton.titleLabel?.font = UIFont(name: "Jua-Regular", size: 18)
+        mapButton.layer.cornerRadius = 10
+        mapButton.translatesAutoresizingMaskIntoConstraints = false
+        mapButton.addTarget(self, action: #selector(openInNaverMap), for: .touchUpInside)
         
-        [shopImage, shopName, shopCategory, locationIcon, shopAddress,
-         divider1, saleInfoTitle, saleInfo,
-         divider2, saleDateTitle, saleDate,
-         divider3, targetTitle, shopDepartment, shopMajor,
-         divider4, etcTitle, etc].forEach {
+        [shopImage, shopName, shopCategory, locationIcon, shopAddress, divider,
+         saleInfoTitle, saleInfo,
+         saleDateTitle, saleDate,
+         targetTitle, shopDepartment, shopMajor,
+         etcTitle, etc, mapButton].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             addSubview($0)
         }
@@ -140,36 +149,26 @@ class StoreDetailView: UIView {
             shopAddress.leadingAnchor.constraint(equalTo: locationIcon.trailingAnchor, constant: 5),
             shopAddress.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             
-            divider1.topAnchor.constraint(equalTo: shopAddress.bottomAnchor, constant: 10),
-            divider1.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            divider1.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            divider1.heightAnchor.constraint(equalToConstant: 1),
+            divider.topAnchor.constraint(equalTo: shopAddress.bottomAnchor, constant: 10),
+            divider.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            divider.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            divider.heightAnchor.constraint(equalToConstant: 2),
             
-            saleInfoTitle.topAnchor.constraint(equalTo: divider1.bottomAnchor, constant: 15),
+            saleInfoTitle.topAnchor.constraint(equalTo: divider.bottomAnchor, constant: 15),
             saleInfoTitle.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             
             saleInfo.topAnchor.constraint(equalTo: saleInfoTitle.bottomAnchor, constant: 10),
             saleInfo.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             saleInfo.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             
-            divider2.topAnchor.constraint(equalTo: saleInfo.bottomAnchor, constant: 10),
-            divider2.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            divider2.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            divider2.heightAnchor.constraint(equalToConstant: 1),
-            
-            saleDateTitle.topAnchor.constraint(equalTo: divider2.bottomAnchor, constant: 15),
+            saleDateTitle.topAnchor.constraint(equalTo: saleInfo.bottomAnchor, constant: 15),
             saleDateTitle.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             
             saleDate.topAnchor.constraint(equalTo: saleDateTitle.bottomAnchor, constant: 10),
             saleDate.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             saleDate.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             
-            divider3.topAnchor.constraint(equalTo: saleDate.bottomAnchor, constant: 10),
-            divider3.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            divider3.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            divider3.heightAnchor.constraint(equalToConstant: 1),
-            
-            targetTitle.topAnchor.constraint(equalTo: divider3.bottomAnchor, constant: 15),
+            targetTitle.topAnchor.constraint(equalTo: saleDate.bottomAnchor, constant: 15),
             targetTitle.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             
             shopDepartment.topAnchor.constraint(equalTo: targetTitle.bottomAnchor, constant: 10),
@@ -177,18 +176,30 @@ class StoreDetailView: UIView {
             shopMajor.centerYAnchor.constraint(equalTo: shopDepartment.centerYAnchor),
             shopMajor.leadingAnchor.constraint(equalTo: shopDepartment.trailingAnchor, constant: 10),
             
-            divider4.topAnchor.constraint(equalTo: shopDepartment.bottomAnchor, constant: 10),
-            divider4.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            divider4.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            divider4.heightAnchor.constraint(equalToConstant: 1),
-            
-            etcTitle.topAnchor.constraint(equalTo: divider4.bottomAnchor, constant: 15),
+            etcTitle.topAnchor.constraint(equalTo: shopMajor.bottomAnchor, constant: 15),
             etcTitle.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             
             etc.topAnchor.constraint(equalTo: etcTitle.bottomAnchor, constant: 10),
             etc.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            etc.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16)
+            etc.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            
+            mapButton.topAnchor.constraint(equalTo: etc.bottomAnchor, constant: 50),
+            mapButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            mapButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            mapButton.heightAnchor.constraint(equalToConstant: 44)
         ])
     }
+    
+    // 네이버 지도 클릭
+    @objc private func openInNaverMap() {
+        let coordinateURL = URL(string: "nmap://place?lat=\(store.lat)&lng=\(store.lng)&name=\(store.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")&appname=com.jeolhak.ios.jeolhak")!
+        // let url = URL(string: "nmap://search?query=\(store.address + " " + store.name)&appname=com.jeolhak.ios.jeolhak")!
+        let appStoreURL = URL(string: "http://itunes.apple.com/app/id311867728?mt=8")!
+        
+        if UIApplication.shared.canOpenURL(coordinateURL) {
+            UIApplication.shared.open(coordinateURL)
+        } else {
+            UIApplication.shared.open(appStoreURL)
+        }
+    }
 }
-

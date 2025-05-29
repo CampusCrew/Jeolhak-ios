@@ -11,7 +11,6 @@ import UIKit
 enum UserInfoEntryMode{
     case initialLaunch // 최초 실행
     case changeSettings // 설정 변경
-    case uploadShop // 가게 등록 모드
 }
 
 class UserInfoViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
@@ -37,7 +36,7 @@ class UserInfoViewController: UIViewController, UIPickerViewDelegate, UIPickerVi
         restoreDepartments() // 기존 저장사항 불러오기
         
         // 수정 모드 혹은 가게 등록 모드일 때
-        if entryMode == .changeSettings || entryMode == .uploadShop {
+        if entryMode == .changeSettings {
             preferredContentSize = CGSize(width: 360, height: 420)
             
             if let sheet = sheetPresentationController {
@@ -199,8 +198,7 @@ class UserInfoViewController: UIViewController, UIPickerViewDelegate, UIPickerVi
                 })
             }
             
-        case .changeSettings, .uploadShop:
-            // 상위 View (DismissTriggerViewController)까지 dismiss
+        case .changeSettings:
             if let presentingVC = self.presentingViewController,
                let rootPresenter = presentingVC.presentingViewController {
                 rootPresenter.dismiss(animated: true) {
