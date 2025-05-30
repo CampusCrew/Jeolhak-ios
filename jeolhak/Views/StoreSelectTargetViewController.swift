@@ -13,10 +13,6 @@ class StoreSelectTargetViewController: UIViewController, UIPickerViewDelegate, U
 
     private let titleLabel = UILabel()
     private let pickerView = UIPickerView()
-    private let divisionLabel = UILabel()
-    private let divisionStack = UIStackView()
-    private let targetLabel = UILabel()
-    private let targetStack = UIStackView()
     private let nextButton = UIButton()
 
     private let departments: [Department] = allDepartments
@@ -24,7 +20,6 @@ class StoreSelectTargetViewController: UIViewController, UIPickerViewDelegate, U
     private var selectedMajor: String = ""
 
     private var selectedDivision: String = "학과"
-    private var selectedTarget: String = "재학생"
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,10 +27,9 @@ class StoreSelectTargetViewController: UIViewController, UIPickerViewDelegate, U
 
         setupLabel()
         setupPicker()
-        setupCheckboxes()
         setupButton()
 
-        preferredContentSize = CGSize(width: 360, height: 550)
+        preferredContentSize = CGSize(width: 360, height: 480)
         if let sheet = sheetPresentationController {
             sheet.detents = [.medium()]
             sheet.prefersGrabberVisible = true
@@ -55,7 +49,7 @@ class StoreSelectTargetViewController: UIViewController, UIPickerViewDelegate, U
 
         NSLayoutConstraint.activate([
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 30)
+            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 50)
         ])
     }
 
@@ -69,79 +63,8 @@ class StoreSelectTargetViewController: UIViewController, UIPickerViewDelegate, U
             pickerView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             pickerView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
             pickerView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.9),
-            pickerView.heightAnchor.constraint(equalToConstant: 150)
+            pickerView.heightAnchor.constraint(equalToConstant: 280)
         ])
-    }
-
-    private func setupCheckboxes() {
-        setupSection(label: divisionLabel, title: "구분 선택", stack: divisionStack, options: ["단과", "학과"]) { [weak self] selected in
-            self?.selectedDivision = selected
-        }
-
-        setupSection(label: targetLabel, title: "대상 선택", stack: targetStack, options: ["재학생", "휴학생", "재학생/휴학생"]) { [weak self] selected in
-            self?.selectedTarget = selected
-        }
-
-        NSLayoutConstraint.activate([
-            divisionLabel.topAnchor.constraint(equalTo: pickerView.bottomAnchor, constant: 10),
-            divisionLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-
-            divisionStack.topAnchor.constraint(equalTo: divisionLabel.bottomAnchor, constant: 6),
-            divisionStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-
-            targetLabel.topAnchor.constraint(equalTo: divisionStack.bottomAnchor, constant: 20),
-            targetLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-
-            targetStack.topAnchor.constraint(equalTo: targetLabel.bottomAnchor, constant: 6),
-            targetStack.centerXAnchor.constraint(equalTo: view.centerXAnchor)
-        ])
-    }
-
-    private func setupSection(label: UILabel, title: String, stack: UIStackView, options: [String], onSelect: @escaping (String) -> Void) {
-        label.text = title
-        label.textColor = .mainPink
-        label.font = UIFont(name: "Jua-Regular", size: 16)
-        label.textAlignment = .center
-        label.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(label)
-
-        stack.axis = .horizontal
-        stack.spacing = 20
-        stack.alignment = .center
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(stack)
-
-        for option in options {
-            let button = createCheckboxButton(title: option)
-            button.addAction(UIAction { _ in
-                self.updateCheckboxSelection(stack: stack, selected: option)
-                onSelect(option)
-            }, for: .touchUpInside)
-            stack.addArrangedSubview(button)
-        }
-    }
-
-    private func createCheckboxButton(title: String) -> UIButton {
-        let button = UIButton(type: .custom)
-        button.setTitle(title, for: .normal)
-        button.setTitleColor(.mainPink, for: .normal)
-        button.setTitleColor(.white, for: .selected)
-        button.titleLabel?.font = UIFont(name: "Jua-Regular", size: 16)
-        button.backgroundColor = .white
-        button.layer.borderColor = UIColor.mainPink.cgColor
-        button.layer.borderWidth = 1
-        button.layer.cornerRadius = 6
-        button.contentEdgeInsets = UIEdgeInsets(top: 6, left: 12, bottom: 6, right: 12)
-        return button
-    }
-
-    private func updateCheckboxSelection(stack: UIStackView, selected: String) {
-        for case let button as UIButton in stack.arrangedSubviews {
-            let isSelected = (button.title(for: .normal) == selected)
-            button.isSelected = isSelected
-            button.backgroundColor = isSelected ? .mainPink : .white
-            button.setTitleColor(isSelected ? .white : .mainPink, for: .normal)
-        }
     }
 
     private func setupButton() {
@@ -157,17 +80,23 @@ class StoreSelectTargetViewController: UIViewController, UIPickerViewDelegate, U
 
         NSLayoutConstraint.activate([
             nextButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            nextButton.topAnchor.constraint(equalTo: targetStack.bottomAnchor, constant: 25),
+            nextButton.topAnchor.constraint(equalTo: pickerView.bottomAnchor, constant: -10),
             nextButton.widthAnchor.constraint(equalToConstant: 200),
             nextButton.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
 
-    // MARK: - PickerView Delegate/DataSource
-    func numberOfComponents(in pickerView: UIPickerView) -> Int { return 2 }
+    // MARK: - UIPickerView DataSource & Delegate
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 2
+    }
 
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return component == 0 ? departments.count : departments[selectedDepartmentIndex].majors.count
+        if component == 0 {
+            return departments.count
+        } else {
+            return departments[selectedDepartmentIndex].majors.count
+        }
     }
 
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
@@ -195,20 +124,20 @@ class StoreSelectTargetViewController: UIViewController, UIPickerViewDelegate, U
     }
 
     // MARK: - Next Button Action
+    // 다음 버튼 클릭 시 UploadFormView로 전달
     @objc private func nextTapped() {
         let selectedDept = departments[selectedDepartmentIndex].departmentName
         let selectedMaj = selectedMajor.isEmpty ? departments[selectedDepartmentIndex].majors[0] : selectedMajor
+        let result = "\(selectedDept) \(selectedMaj)"
 
-        let partDivision = selectedDivision
-        let partName = (partDivision == "단과") ? selectedDept : selectedMaj
-        let saleTarget = "\(partName) \(selectedTarget)"
-
-        let payload: [String: String] = [
-            "partDivision": partDivision,
-            "partName": partName,
-            "saleTarget": saleTarget
-        ]
-
-        print("✅ 최종 전송 데이터: \(payload)")
+        NotificationCenter.default.post(
+            name: .didSelectTarget,
+            object: nil,
+            userInfo: ["target": result]
+        )
+        
+        // StoreSelectTargetViewController와
+        // triggerVC(DismissTriggerViewController)까지 동시에 dismiss
+        presentingViewController?.presentingViewController?.dismiss(animated: true)
     }
 }

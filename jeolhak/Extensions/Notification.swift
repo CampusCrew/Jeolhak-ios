@@ -18,4 +18,7 @@ extension Notification.Name {
     
     // FCM 알람 수신 감지
     static let didReceivePushNotification = Notification.Name("didReceivePushNotification")
+    
+    // 할인 가게 등록 뷰에서, 단과 및 학과 수신 감지
+    static let didSelectTarget = Notification.Name("didSelectTarget")
 }

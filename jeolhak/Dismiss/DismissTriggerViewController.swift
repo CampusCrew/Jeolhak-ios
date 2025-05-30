@@ -8,7 +8,6 @@
 import UIKit
 
 // MARK: - 모달을 위한 임시 ViewController
-// 모달을 출력했을 때 호출하는 VC를 Naver Map View가 가리고 있기에 활용한다.
 class DismissTriggerViewController: UIViewController {
     
     private let modalToPresent: UIViewController
