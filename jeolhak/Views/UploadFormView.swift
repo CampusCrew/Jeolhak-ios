@@ -9,92 +9,119 @@ import UIKit
 
 // MARK: - 할인 가게 등록 폼
 
-class UploadFormView: UIView, UITextFieldDelegate {
-
+class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
+    
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     private let stackView = UIStackView()
-
+    
     private let registerButton = UIButton(type: .system)
     private let targetLabel = UILabel()
     private let targetStack = UIStackView()
     private var selectedTarget: String = "재학생"
     private var textFields: [UITextField] = []
-
+    
     // 가게 주소 선택 라벨
     private let addressFieldLabel = UILabel()
     // 할인 대상 선택 라벨
     private let targetFieldLabel = UILabel()
     // 할인 기간 선택 라벨
     private let saleDateFieldLabel = UILabel()
-
+    
+    // DatePickerManager 사용
+    private var datePickerManager: DatePickerManager?
+    
     var onMapButtonTapped: (() -> Void)?
     var onTargetButtonTapped: (() -> Void)?
     var onSaleDateButtonTapped: (() -> Void)?
     var onRegisterButtonTapped: (() -> Void)?
-
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
-
+        
+        // 할인 대상 수신
         NotificationCenter.default.addObserver(self, selector: #selector(handleTargetSelected(_:)), name: .didSelectTarget, object: nil)
-
+        // 할인 기간 수신
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleSaleDateSelected(_:)),
+            name: .didSelectSaleDate,
+            object: nil
+        )
+        
         setupLayout()
         setupDismissKeyboardGesture()
         setupKeyboardNotifications()
+        setupDatePickerManager()
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
-
+    
+    // MARK: - DatePickerManager Setup
+    
+    private func setupDatePickerManager() {
+        datePickerManager = DatePickerManager(stackView: stackView)
+        datePickerManager?.delegate = self
+    }
+    
     // MARK: - Notification Handler
-
+    
+    // 할인 대상 수신 핸들러
     @objc private func handleTargetSelected(_ notification: Notification) {
         if let target = notification.userInfo?["target"] as? String {
             updateTargetField(with: target)
         }
     }
-
+    
+    // 할인 기간 수신 핸들러
+    @objc private func handleSaleDateSelected(_ notification: Notification) {
+        if let date = notification.userInfo?["date"] as? String {
+            updateSaleDateField(with: date)
+        }
+    }
+    
     // MARK: - Layout
-
+    
     private func setupLayout() {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.showsVerticalScrollIndicator = false
         scrollView.showsHorizontalScrollIndicator = false
-
+        
         contentView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .vertical
         stackView.spacing = 20
         stackView.translatesAutoresizingMaskIntoConstraints = false
-
+        
         setupRegisterButton()
-
+        
         addSubview(scrollView)
         scrollView.addSubview(contentView)
         contentView.addSubview(stackView)
-
+        
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
-
+            
             contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
             contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
             contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
             contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
             contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
-
+            
             stackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
             stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
             stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
             stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20)
         ])
-
+        
         // Add fields
         stackView.addArrangedSubview(makeField(title: "가게 이름", placeholder: "예) 모쿠모쿠"))
         stackView.addArrangedSubview(makeClickableField(title: "가게 주소", placeholder: "예) 익산시 무왕로 18-1길", label: addressFieldLabel, action: #selector(handleMapButtonTapped)))
@@ -103,92 +130,91 @@ class UploadFormView: UIView, UITextFieldDelegate {
         stackView.addArrangedSubview(makeField(title: "할인 정보", placeholder: "예) 30,000원 이상 결제 시 10% 할인"))
         stackView.addArrangedSubview(makeField(title: "기타 사항", placeholder: "예) 클리커 지참 필수"))
         stackView.addArrangedSubview(makeField(title: "요청자", placeholder: "예) 컴퓨터소프트웨어공학과 학생회"))
-
+        
         setupTargetSelection()
-
+        
         let spacer = UIView()
         spacer.translatesAutoresizingMaskIntoConstraints = false
         spacer.heightAnchor.constraint(equalToConstant: 13).isActive = true
         stackView.addArrangedSubview(spacer)
-
+        
         registerButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
-        // registerButton.widthAnchor.constraint(equalToConstant: 120).isActive = true
         stackView.addArrangedSubview(registerButton)
     }
-
+    
     // MARK: - Custom Fields
-
+    
     private func makeClickableField(title: String, placeholder: String, label: UILabel, action: Selector) -> UIView {
         let container = UIStackView()
         container.axis = .vertical
         container.spacing = 6
-
+        
         let titleLabel = UILabel()
         titleLabel.text = title
         titleLabel.font = UIFont(name: "Jua-Regular", size: 16)
         titleLabel.textColor = .mainPink
-
+        
         let clickableView = UIView()
         clickableView.layer.borderWidth = 1
         clickableView.layer.borderColor = UIColor.mainPink.cgColor
         clickableView.layer.cornerRadius = 8
         clickableView.heightAnchor.constraint(equalToConstant: 42).isActive = true
-
+        
         label.text = placeholder
         label.font = UIFont(name: "Jua-Regular", size: 13)
         label.textColor = .gray
         label.translatesAutoresizingMaskIntoConstraints = false
-
+        
         let iconImageView = UIImageView()
         iconImageView.translatesAutoresizingMaskIntoConstraints = false
         iconImageView.tintColor = .mainPink
         iconImageView.contentMode = .scaleAspectFit
-
+        
         let iconName: String
         switch title {
         case "가게 주소": iconName = "map"
         case "할인 대상": iconName = "graduationcap"
-        case "할인 기간": iconName = "calendar"
+        case "할인 기간": iconName = "calendar.circle"
         default: iconName = "chevron.right"
         }
-
+        
         iconImageView.image = UIImage(systemName: iconName, withConfiguration: UIImage.SymbolConfiguration(pointSize: 18, weight: .medium))
-
+        
         clickableView.addSubview(label)
         clickableView.addSubview(iconImageView)
-
+        
         NSLayoutConstraint.activate([
             label.leadingAnchor.constraint(equalTo: clickableView.leadingAnchor, constant: 8),
             label.centerYAnchor.constraint(equalTo: clickableView.centerYAnchor),
             label.trailingAnchor.constraint(lessThanOrEqualTo: iconImageView.leadingAnchor, constant: -8),
-
+            
             iconImageView.trailingAnchor.constraint(equalTo: clickableView.trailingAnchor, constant: -12),
             iconImageView.centerYAnchor.constraint(equalTo: clickableView.centerYAnchor),
             iconImageView.widthAnchor.constraint(equalToConstant: 30),
             iconImageView.heightAnchor.constraint(equalToConstant: 36)
         ])
-
+        
         let tapGesture = UITapGestureRecognizer(target: self, action: action)
         clickableView.addGestureRecognizer(tapGesture)
-
+        
         container.addArrangedSubview(titleLabel)
         container.addArrangedSubview(clickableView)
-
+        
         return container
     }
-
+    
     // MARK: - Update Methods
-
+    
     func updateTargetField(with text: String) {
         targetFieldLabel.text = text
         targetFieldLabel.textColor = .black
     }
-
+    
     func updateAddressField(with text: String) {
         addressFieldLabel.text = text
         addressFieldLabel.textColor = .black
     }
-
+    
     func updateSaleDateField(with text: String) {
         saleDateFieldLabel.text = text
         saleDateFieldLabel.textColor = .black
@@ -225,7 +251,7 @@ class UploadFormView: UIView, UITextFieldDelegate {
         targetContainer.addSubview(targetLabel)
         targetContainer.addSubview(targetStack)
         
-        let options = ["재학생", "휴학생", "재학생/휴학생"]
+        let options = ["재학생", "휴학생"]
         for option in options {
             let button = createCheckboxButton(title: option)
             button.addAction(UIAction { _ in
@@ -274,16 +300,6 @@ class UploadFormView: UIView, UITextFieldDelegate {
             button.backgroundColor = isSelected ? .mainPink : .white
             button.setTitleColor(isSelected ? .white : .mainPink, for: .normal)
         }
-    }
-    
-    private func setupDismissKeyboardGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        tapGesture.cancelsTouchesInView = false
-        self.addGestureRecognizer(tapGesture)
-    }
-    
-    @objc private func dismissKeyboard() {
-        self.endEditing(true)
     }
     
     private func setupKeyboardNotifications() {
@@ -361,78 +377,13 @@ class UploadFormView: UIView, UITextFieldDelegate {
         return container
     }
     
-    // 클릭 가능한 필드 생성 (뷰 + 라벨)
-    private func makeClickableField(title: String, placeholder: String, action: Selector) -> UIView {
-        let container = UIStackView()
-        container.axis = .vertical
-        container.spacing = 6
-        
-        let titleLabel = UILabel()
-        titleLabel.text = title
-        titleLabel.font = UIFont(name: "Jua-Regular", size: 16)
-        titleLabel.textColor = .mainPink
-        
-        let clickableView = UIView()
-        clickableView.layer.borderWidth = 1
-        clickableView.layer.borderColor = UIColor.mainPink.cgColor
-        clickableView.layer.cornerRadius = 8
-        clickableView.heightAnchor.constraint(equalToConstant: 42).isActive = true
-        
-        let label = UILabel()
-        label.text = placeholder
-        label.font = UIFont(name: "Jua-Regular", size: 13)
-        label.textColor = .gray
-        label.translatesAutoresizingMaskIntoConstraints = false
-        
-        // 아이콘 추가
-        let iconImageView = UIImageView()
-        iconImageView.translatesAutoresizingMaskIntoConstraints = false
-        iconImageView.tintColor = .mainPink
-        iconImageView.contentMode = .scaleAspectFit
-        
-        let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .medium)
-        var iconName = ""
-        
-        if title == "가게 주소" {
-            iconName = "map"
-        } else if title == "할인 대상" {
-            iconName = "graduationcap"
-        } else if title == "할인 기간" {
-            iconName = "calendar"
-        }
-        
-        iconImageView.image = UIImage(systemName: iconName, withConfiguration: config)
-        
-        clickableView.addSubview(label)
-        clickableView.addSubview(iconImageView)
-        
-        NSLayoutConstraint.activate([
-            label.leadingAnchor.constraint(equalTo: clickableView.leadingAnchor, constant: 8),
-            label.centerYAnchor.constraint(equalTo: clickableView.centerYAnchor),
-            label.trailingAnchor.constraint(lessThanOrEqualTo: iconImageView.leadingAnchor, constant: -8),
-            
-            iconImageView.trailingAnchor.constraint(equalTo: clickableView.trailingAnchor, constant: -12),
-            iconImageView.centerYAnchor.constraint(equalTo: clickableView.centerYAnchor),
-            iconImageView.widthAnchor.constraint(equalToConstant: 30),
-            iconImageView.heightAnchor.constraint(equalToConstant: 36)
-        ])
-        
-        let tapGesture = UITapGestureRecognizer(target: self, action: action)
-        clickableView.addGestureRecognizer(tapGesture)
-        
-        container.addArrangedSubview(titleLabel)
-        container.addArrangedSubview(clickableView)
-        
-        return container
-    }
-    
-    // 가게 주소 입력 버튼 클릭 핸들러
+    // MARK: - 가게 주소 입력 버튼 클릭 핸들러
     @objc private func handleMapButtonTapped() {
         print("가게 주소 입력 버튼 클릭")
         onMapButtonTapped?()
     }
     
-    // 할인 대상 입력 버튼 클릭 핸들러
+    // MARK: - 할인 대상 입력 버튼 클릭 핸들러
     @objc private func handleTargetButtonTapped() {
         print("할인 대상 입력 버튼 클릭")
         if let presentedVC = parentViewController?.presentedViewController as? StoreSelectTargetViewController {
@@ -450,11 +401,13 @@ class UploadFormView: UIView, UITextFieldDelegate {
         }
     }
     
-    // 할인 기간 입력 버튼 클릭 핸들러
+    // MARK: - 할인 기간 입력 버튼 클릭 핸들러 (DatePickerManager 사용)
     @objc private func handleSaleInfoButtonTapped() {
         print("할인 기간 입력 버튼 클릭")
-        onSaleDateButtonTapped?()
+        datePickerManager?.showDatePicker()
     }
+    
+    // MARK: - 텍스트 필드 처리
     
     // 키보드 엔터 처리
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -482,6 +435,40 @@ class UploadFormView: UIView, UITextFieldDelegate {
     func textFieldDidEndEditing(_ textField: UITextField) {
         scrollView.isScrollEnabled = true
     }
+    
+    // MARK: - 외부 탭 시 발생하는 이벤트 처리
+    private func setupDismissKeyboardGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        // 위임
+        tapGesture.delegate = self
+        self.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc private func dismissKeyboard() {
+        self.endEditing(true)
+    }
+
+}
+
+// MARK: - DatePickerManagerDelegate
+
+extension UploadFormView: DatePickerManagerDelegate {
+    
+    func datePickerManager(_ manager: DatePickerManager, didSelectDateRange startDate: Date, endDate: Date) {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy.MM.dd"
+        let dateRangeText = "\(formatter.string(from: startDate))~\(formatter.string(from: endDate))"
+        
+        updateSaleDateField(with: dateRangeText)
+    }
+    
+    func datePickerManager(_ manager: DatePickerManager, didSelectAlwaysDiscount: String) {
+        updateSaleDateField(with: didSelectAlwaysDiscount)
+    }
+    
+    func datePickerManagerDidCancel(_ manager: DatePickerManager) {
+    }
 }
 
 // MARK: - 텍스트 필드 내부 패딩 설정
@@ -503,27 +490,3 @@ extension UITextField {
         self.rightViewMode = .always
     }
 }
-/*
- 요청
- {
- "name": "김밥천국", // 가게 이름
- "address": "전라북도 익산시 익산대로 123", // 가게 주소
- "partDivision" : "학과", // 단과대학과 학과 구분. ("학과" 혹은 "단과"만 전달)
- // partDivision = "학과"일 시 "학과 명"만 전달
- // partDivision = "단과"일 시 "단과대학 명"만 전달
- "partName" : "컴퓨터소프트웨어공학과",
- // partName + "재학생" or "휴학생" or "재학생/휴학생"
- "saleTarget" : "컴퓨터소프트웨어공학과 재학생",
- "saleInfo" : "10,000원 이상 결제 시 10% 할인",
- // saleDate는 할인 기간을 의미.
- // "상시" 혹은 "YYYY.MM.dd~YYYY.MM.dd" 형식으로 전달
- "saleDate" : "2025.03.04~2025.12.31",
- "etc" : "반드시 클리커가 있어야 할인 적용", // 할인에 해당하는 추가 설명 (자유형식)
- "requester" : "컴공 학생회", // 자유 형식 (요청자)
- }
- 응답
- {
- "message": "가게 등록 성공"
- }
- 
- */

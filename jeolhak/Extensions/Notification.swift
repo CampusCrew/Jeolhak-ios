@@ -21,4 +21,7 @@ extension Notification.Name {
     
     // 할인 가게 등록 뷰에서, 단과 및 학과 수신 감지
     static let didSelectTarget = Notification.Name("didSelectTarget")
+    
+    // 할인 기간 선택 뷰에서, 할인 기간 수신 감지
+    static let didSelectSaleDate = Notification.Name("didSelectSaleDate")
 }
