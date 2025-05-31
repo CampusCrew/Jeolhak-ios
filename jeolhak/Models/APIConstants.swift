@@ -7,12 +7,15 @@
 
 import Foundation
 
+// MARK: - API 경로 관리
 enum APIConstants {
-    static let baseURL = "http://ec2-43-201-94-46.ap-northeast-2.compute.amazonaws.com:8080"
+    private static let baseURL: String = {
+        guard let url = Bundle.main.object(forInfoDictionaryKey: "SERVER_URI") as? String else {
+            fatalError("❌ SERVER_URI 불러오기 실패 ❌")
+        }
+        return url
+    }()
     
-    // GET /stores
     static let getStores = baseURL + "/stores"
-    
-    // POST /notify
     static let postToken = baseURL + "/notify"
 }

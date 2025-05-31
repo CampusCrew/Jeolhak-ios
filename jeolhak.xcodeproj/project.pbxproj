@@ -503,6 +503,8 @@
 		};
 		D7C5BDD42D950E4A0006652F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = D7C5BDAA2D950E490006652F /* jeolhak */;
+			baseConfigurationReferenceRelativePath = Config/Debug.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -566,6 +568,8 @@
 		};
 		D7C5BDD52D950E4A0006652F /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = D7C5BDAA2D950E490006652F /* jeolhak */;
+			baseConfigurationReferenceRelativePath = Config/Release.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -706,7 +710,7 @@
 				D7C5BDD52D950E4A0006652F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		D7C5BDD12D950E4A0006652F /* Build configuration list for PBXNativeTarget "jeolhak" */ = {
 			isa = XCConfigurationList;
@@ -715,7 +719,7 @@
 				D7C5BDD32D950E4A0006652F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		D7C5BDD62D950E4A0006652F /* Build configuration list for PBXNativeTarget "jeolhakTests" */ = {
 			isa = XCConfigurationList;
@@ -724,7 +728,7 @@
 				D7C5BDD82D950E4A0006652F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		D7C5BDD92D950E4A0006652F /* Build configuration list for PBXNativeTarget "jeolhakUITests" */ = {
 			isa = XCConfigurationList;
@@ -733,7 +737,7 @@
 				D7C5BDDB2D950E4A0006652F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};
