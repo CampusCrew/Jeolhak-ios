@@ -80,13 +80,3 @@ class MapManager: NSObject, CLLocationManagerDelegate, NMFMapViewCameraDelegate 
         onLocationUpdateFail?()
     }
 }
-    
-    // 지도 이동 종료 시 호출 (NMFMapViewCameraDelegate 채택) (임시적으로 사용 안함)
-//    func mapViewCameraIdle(_ mapView: NMFMapView) {
-//        // 현재 카메라 위치
-//        let cameraPosition = mapView.cameraPosition
-//
-//        // 외부 전달
-//        onCameraIdle?(cameraPosition)
-//    }
-

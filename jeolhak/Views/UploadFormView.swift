@@ -381,17 +381,24 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
     @objc private func handleMapButtonTapped() {
         print("가게 주소 입력 버튼 클릭")
         onMapButtonTapped?()
+        
         if let presentedVC = parentViewController?.presentedViewController as? SelectAddressViewController {
             presentedVC.dismiss(animated: true)
         } else {
             let selectAddressVC = SelectAddressViewController()
             
-            let triggerVC = DismissTriggerViewController(modal: selectAddressVC)
+            // 콜백 설정
+            selectAddressVC.onAddressSelected = { [weak self] selectedAddress in
+                // 선택된 주소로 라벨 업데이트
+                self?.updateAddressField(with: selectedAddress)
+            }
+            
+            let nav = UINavigationController(rootViewController: selectAddressVC)
+            
+            let triggerVC = DismissTriggerViewController(modal: nav)
             triggerVC.modalPresentationStyle = .overFullScreen
             triggerVC.modalTransitionStyle = .crossDissolve
             
-            // SelectAddressViewController를
-            // DismissTriggerViewController위에 올리기. 즉, 같이 올라감
             parentViewController?.present(triggerVC, animated: false)
         }
     }
@@ -461,7 +468,7 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
     @objc private func dismissKeyboard() {
         self.endEditing(true)
     }
-
+    
 }
 
 // MARK: - DatePickerManagerDelegate

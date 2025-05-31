@@ -14,7 +14,6 @@ class SplashViewController: UIViewController {
         super.viewDidLoad()
         
         view.backgroundColor = .white
-        
         // 로고
         setupLogo()
         
