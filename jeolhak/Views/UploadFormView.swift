@@ -21,6 +21,10 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
     private var selectedTarget: String = "재학생"
     private var textFields: [UITextField] = []
     
+    // 할인 정보 입력용 TextView 추가
+    private var discountInfoTextView: UITextView?
+    private var discountInfoHeightConstraint: NSLayoutConstraint?
+    
     // 가게 주소 선택 라벨
     private let addressFieldLabel = UILabel()
     // 할인 대상 선택 라벨
@@ -128,7 +132,7 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
         stackView.addArrangedSubview(makeClickableField(title: "가게 주소", placeholder: "예) 익산시 무왕로 18-1길", label: addressFieldLabel, action: #selector(handleMapButtonTapped)))
         stackView.addArrangedSubview(makeClickableField(title: "할인 대상", placeholder: "예) 창의공과대학 컴퓨터소프트웨어공학과", label: targetFieldLabel, action: #selector(handleTargetButtonTapped)))
         stackView.addArrangedSubview(makeClickableField(title: "할인 기간", placeholder: "예) 6월 1일 ~ 7월 10일", label: saleDateFieldLabel, action: #selector(handleSaleInfoButtonTapped)))
-        stackView.addArrangedSubview(makeField(title: "할인 정보", placeholder: "예) 30,000원 이상 결제 시 10% 할인"))
+        stackView.addArrangedSubview(makeTextViewField(title: "할인 정보", placeholder: "예) 30,000원 이상 결제 시 10% 할인"))
         stackView.addArrangedSubview(makeField(title: "기타 사항", placeholder: "예) 클리커 지참 필수"))
         stackView.addArrangedSubview(makeField(title: "요청자", placeholder: "예) 컴퓨터소프트웨어공학과 학생회"))
         
@@ -378,6 +382,46 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
         return container
     }
     
+    // 다중 줄 입력 필드 생성 (TextView)
+    private func makeTextViewField(title: String, placeholder: String) -> UIView {
+        let container = UIStackView()
+        container.axis = .vertical
+        container.spacing = 6
+        
+        let titleLabel = UILabel()
+        titleLabel.text = title
+        titleLabel.font = UIFont(name: "Jua-Regular", size: 16)
+        titleLabel.textColor = .mainPink
+        
+        let textView = UITextView()
+        textView.delegate = self
+        textView.font = UIFont(name: "Jua-Regular", size: 13)
+        textView.backgroundColor = .white
+        textView.textColor = .black
+        textView.layer.borderWidth = 1
+        textView.layer.borderColor = UIColor.mainPink.cgColor
+        textView.layer.cornerRadius = 8
+        textView.textContainerInset = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
+        textView.returnKeyType = .default
+        textView.isScrollEnabled = false
+        
+        // 기본 높이 설정
+        let minHeight: CGFloat = 50
+        discountInfoHeightConstraint = textView.heightAnchor.constraint(equalToConstant: minHeight)
+        discountInfoHeightConstraint?.isActive = true
+        
+        // 플레이스홀더 설정
+        textView.text = placeholder
+        textView.textColor = .gray
+        
+        discountInfoTextView = textView
+        
+        container.addArrangedSubview(titleLabel)
+        container.addArrangedSubview(textView)
+        
+        return container
+    }
+    
     // MARK: - 가게 주소 입력 버튼 클릭 핸들러
     @objc private func handleMapButtonTapped() {
         print("가게 주소 입력 버튼 클릭")
@@ -437,7 +481,8 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
             if nextIndex < textFields.count {
                 textFields[nextIndex].becomeFirstResponder()
             } else {
-                textField.resignFirstResponder()
+                // 다음 필드가 TextView라면 포커스 이동
+                discountInfoTextView?.becomeFirstResponder()
             }
         }
         return true
@@ -470,6 +515,52 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
         self.endEditing(true)
     }
     
+}
+
+// MARK: - UITextViewDelegate
+
+extension UploadFormView: UITextViewDelegate {
+    
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        scrollView.isScrollEnabled = false
+        
+        // 플레이스홀더 제거
+        if textView.textColor == .gray {
+            textView.text = ""
+            textView.textColor = .black
+        }
+    }
+    
+    func textViewDidEndEditing(_ textView: UITextView) {
+        scrollView.isScrollEnabled = true
+        
+        // 빈 텍스트일 경우 플레이스홀더 복원
+        if textView.text.isEmpty {
+            textView.text = "예) 30,000원 이상 결제 시 10% 할인"
+            textView.textColor = .gray
+        }
+    }
+    
+    func textViewDidChange(_ textView: UITextView) {
+        // 텍스트가 변경될 때마다 높이 재계산
+        updateTextViewHeight(textView)
+    }
+    
+    private func updateTextViewHeight(_ textView: UITextView) {
+        let fixedWidth = textView.frame.width
+        let newSize = textView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.greatestFiniteMagnitude))
+        let minHeight: CGFloat = 42
+        let newHeight = max(newSize.height, minHeight)
+        
+        // 높이가 변경되었을 때만 업데이트
+        if abs(discountInfoHeightConstraint?.constant ?? 0 - newHeight) > 1 {
+            discountInfoHeightConstraint?.constant = newHeight
+            
+            UIView.animate(withDuration: 0.2) {
+                self.layoutIfNeeded()
+            }
+        }
+    }
 }
 
 // MARK: - DatePickerManagerDelegate
