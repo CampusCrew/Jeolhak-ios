@@ -251,7 +251,7 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
         targetContainer.addSubview(targetLabel)
         targetContainer.addSubview(targetStack)
         
-        let options = ["재학생", "휴학생"]
+        let options = ["재학생", "휴학생", "재학생/휴학생"]
         for option in options {
             let button = createCheckboxButton(title: option)
             button.addAction(UIAction { _ in
@@ -381,6 +381,19 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
     @objc private func handleMapButtonTapped() {
         print("가게 주소 입력 버튼 클릭")
         onMapButtonTapped?()
+        if let presentedVC = parentViewController?.presentedViewController as? SelectAddressViewController {
+            presentedVC.dismiss(animated: true)
+        } else {
+            let selectAddressVC = SelectAddressViewController()
+            
+            let triggerVC = DismissTriggerViewController(modal: selectAddressVC)
+            triggerVC.modalPresentationStyle = .overFullScreen
+            triggerVC.modalTransitionStyle = .crossDissolve
+            
+            // SelectAddressViewController를
+            // DismissTriggerViewController위에 올리기. 즉, 같이 올라감
+            parentViewController?.present(triggerVC, animated: false)
+        }
     }
     
     // MARK: - 할인 대상 입력 버튼 클릭 핸들러

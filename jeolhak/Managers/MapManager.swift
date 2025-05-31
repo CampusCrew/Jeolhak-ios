@@ -20,7 +20,7 @@ class MapManager: NSObject, CLLocationManagerDelegate, NMFMapViewCameraDelegate 
     
     // 현재 위치 저장
     var currentLocation: CLLocationCoordinate2D? = nil
-
+    
     // 중복 요청 방지
     private var hasRequestedLocation = false
     
@@ -49,21 +49,13 @@ class MapManager: NSObject, CLLocationManagerDelegate, NMFMapViewCameraDelegate 
             locationManager.startUpdatingLocation()
         }
     }
-
+    
     // 수동으로 현재 위치 요청
     func requestCurrentLocation() {
         locationManager.startUpdatingLocation()
     }
     
-    // 지도 이동 종료 시 호출 (NMFMapViewCameraDelegate 채택) (임시적으로 사용 안함)
-//    func mapViewCameraIdle(_ mapView: NMFMapView) {
-//        // 현재 카메라 위치
-//        let cameraPosition = mapView.cameraPosition
-//        
-//        // 외부 전달
-//        onCameraIdle?(cameraPosition)
-//    }
-
+    
     // MARK: - CLLocationManagerDelegate
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.first else { return }
@@ -88,3 +80,13 @@ class MapManager: NSObject, CLLocationManagerDelegate, NMFMapViewCameraDelegate 
         onLocationUpdateFail?()
     }
 }
+    
+    // 지도 이동 종료 시 호출 (NMFMapViewCameraDelegate 채택) (임시적으로 사용 안함)
+//    func mapViewCameraIdle(_ mapView: NMFMapView) {
+//        // 현재 카메라 위치
+//        let cameraPosition = mapView.cameraPosition
+//
+//        // 외부 전달
+//        onCameraIdle?(cameraPosition)
+//    }
+
