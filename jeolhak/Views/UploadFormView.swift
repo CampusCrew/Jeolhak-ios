@@ -92,6 +92,7 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.showsVerticalScrollIndicator = false
         scrollView.showsHorizontalScrollIndicator = false
+        scrollView.bounces = false
         
         contentView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .vertical
@@ -251,7 +252,7 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
         targetContainer.addSubview(targetLabel)
         targetContainer.addSubview(targetStack)
         
-        let options = ["재학생", "휴학생", "재학생/휴학생"]
+        let options = ["재학생", "재학생/휴학생"]
         for option in options {
             let button = createCheckboxButton(title: option)
             button.addAction(UIAction { _ in
