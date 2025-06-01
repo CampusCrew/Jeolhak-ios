@@ -38,7 +38,6 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
     var onMapButtonTapped: (() -> Void)?
     var onTargetButtonTapped: (() -> Void)?
     var onSaleDateButtonTapped: (() -> Void)?
-    var onRegisterButtonTapped: (() -> Void)?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -225,6 +224,8 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
         saleDateFieldLabel.textColor = .black
     }
     
+    
+    // MARK: - 등록 버튼 정의
     private func setupRegisterButton() {
         registerButton.setTitle("등록", for: .normal)
         registerButton.titleLabel?.font = UIFont(name: "Jua-Regular", size: 24)
@@ -233,9 +234,141 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
         registerButton.layer.cornerRadius = 15
         registerButton.translatesAutoresizingMaskIntoConstraints = false
         
-        registerButton.addAction(UIAction { _ in
-            self.onRegisterButtonTapped?()
-        }, for: .touchUpInside)
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(onRegisterButtonTapped))
+        registerButton.addGestureRecognizer(tapGesture)
+    }
+    
+    // MARK: - 등록 이벤트
+    
+    @objc private func onRegisterButtonTapped() {
+        print("등록 버튼이 눌렸어요!")
+        
+        // textFields 배열 순서: 가게 이름, 기타 사항, 요청자
+        guard textFields.count >= 3 else {
+            print("❌ 텍스트필드 수 부족")
+            return
+        }
+        
+        // 기본 입력 필드들
+        let name = textFields[0].text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let etc = textFields[1].text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let requester = textFields[2].text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        
+        // 할인 정보 (TextView에서 가져오기, 플레이스홀더 체크)
+        let saleInfo: String
+        if let textView = discountInfoTextView,
+           textView.textColor != .gray,
+           !textView.text.isEmpty {
+            saleInfo = textView.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        } else {
+            saleInfo = ""
+        }
+        
+        // 클릭 가능한 필드들에서 데이터 가져오기
+        let address = addressFieldLabel.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let targetText = targetFieldLabel.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let saleDate = saleDateFieldLabel.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        
+        // 필수 필드 검증
+        if name.isEmpty {
+            showAlert(message: "가게 이름을 입력해주세요")
+            return
+        }
+        
+        if address.isEmpty || address.contains("예)") {
+            showAlert(message: "가게 주소를 선택해주세요")
+            return
+        }
+        
+        if targetText.isEmpty || targetText.contains("예)") {
+            showAlert(message: "할인 대상을 선택해주세요")
+            return
+        }
+        
+        if saleDate.isEmpty || saleDate.contains("예)") {
+            showAlert(message: "할인 기간을 선택해주세요")
+            return
+        }
+        
+        if saleInfo.isEmpty {
+            showAlert(message: "할인 정보를 입력해주세요")
+            return
+        }
+        
+        if requester.isEmpty {
+            showAlert(message: "요청자를 입력해주세요")
+            return
+        }
+        
+        // partDivision과 partName 분리 로직 수정
+        let partDivision: String
+        let partName: String
+        
+        // 먼저 재학생/휴학생 관련 문자열 제거
+        let cleanedTargetText = targetText
+            .replacingOccurrences(of: " 재학생", with: "")
+            .replacingOccurrences(of: " 휴학생", with: "")
+            .replacingOccurrences(of: " 재학생/휴학생", with: "")
+        
+        // 독립학과 처리 (예외 케이스)
+        if cleanedTargetText.contains("독립학과") {
+            partDivision = "학과"
+            partName = cleanedTargetText.replacingOccurrences(of: "독립학과 ", with: "")
+        }
+        // "전체"가 포함된 경우 단과대학
+        else if cleanedTargetText.contains("전체") {
+            partDivision = "단과"
+            // "전체" 문자열 제거 후 공백으로 분리하여 왼쪽(단과대학명) 추출
+            let withoutTotal = cleanedTargetText.replacingOccurrences(of: " 전체", with: "")
+            let components = withoutTotal.components(separatedBy: " ")
+            partName = components.first ?? withoutTotal
+        }
+        // 그 외의 경우 학과
+        else {
+            partDivision = "학과"
+            // 공백으로 분리하여 오른쪽(학과명) 추출
+            let components = cleanedTargetText.components(separatedBy: " ")
+            partName = components.last ?? cleanedTargetText
+        }
+        
+        // saleTarget 생성 (partName + selectedTarget)
+        let saleTarget = "\(partName) \(selectedTarget)"
+        
+        // DTO 생성
+        let payload = UploadStoreRequestDTO(
+            name: name,
+            address: address,
+            partDivision: partDivision,
+            partName: partName,
+            saleTarget: saleTarget,
+            saleInfo: saleInfo,
+            saleDate: saleDate,
+            etc: etc,
+            requester: requester
+        )
+        
+        // MARK: - 가게 등록 진행 (POST, /stores)
+        NetworkManager.shared.requestPOST(
+            urlString: APIConstants.postStores,
+            parameters: payload
+        ) { (result: Result<UploadStoreResponseDTO, APIError>) in
+            switch result {
+            case .success(let response):
+                print("✅ 성공적으로 등록되었어요!: \(response)")
+            case .failure(let error):
+                print("❌ 등록에 실패했어요. : \(error)")
+            }
+        }
+    }
+    
+    // MARK: - 필수 입력 필드 검증
+    private func showAlert(message: String) {
+        guard let parentVC = parentViewController else { return }
+        
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        
+        parentVC.present(alert, animated: true)
     }
     
     private func setupTargetSelection() {
@@ -396,7 +529,6 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
         let textView = UITextView()
         textView.delegate = self
         textView.font = UIFont(name: "Jua-Regular", size: 13)
-        textView.backgroundColor = .white
         textView.textColor = .black
         textView.layer.borderWidth = 1
         textView.layer.borderColor = UIColor.mainPink.cgColor
@@ -405,8 +537,8 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
         textView.returnKeyType = .default
         textView.isScrollEnabled = false
         
-        // 기본 높이 설정
-        let minHeight: CGFloat = 50
+        // 기본 높이 설정 (최소 42pt)
+        let minHeight: CGFloat = 42
         discountInfoHeightConstraint = textView.heightAnchor.constraint(equalToConstant: minHeight)
         discountInfoHeightConstraint?.isActive = true
         
