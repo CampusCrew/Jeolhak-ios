@@ -10,7 +10,7 @@ import UIKit
 class NotificationDateView: UIView {
     
     private var date: String
-
+    
     init(date: String) {
         self.date = date
         super.init(frame: .zero)
@@ -25,19 +25,20 @@ class NotificationDateView: UIView {
     private func setLabel(){
         let label = UILabel()
         label.text = date
-        label.font = UIFont(name: "Jua-Regular", size: 14)
+        label.font = UIFont(name: "Jua-Regular", size: 18)
         label.textColor = .white
         
         label.translatesAutoresizingMaskIntoConstraints = false
-            
+        
         addSubview(label)
         
         // 패딩값 기준, label의 길이 조절
         NSLayoutConstraint.activate([
-            label.topAnchor.constraint(equalTo: topAnchor, constant: 15),
-            label.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -15),
-            label.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            label.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20)
+            label.centerXAnchor.constraint(equalTo: centerXAnchor),
+            label.centerYAnchor.constraint(equalTo: centerYAnchor),
+            
+            // label의 최대 폭이 dateView 내부 padding을 고려해 150보다 작게
+            label.widthAnchor.constraint(lessThanOrEqualToConstant: 110) // 150 - (좌우 여백 20 + 20)
         ])
     }
     

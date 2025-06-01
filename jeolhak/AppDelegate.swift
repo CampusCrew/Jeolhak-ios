@@ -36,6 +36,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         // APNs 토큰 등록
         application.registerForRemoteNotifications()
         
+        // 앱 처음 실행 시 badge 초기화
+        UIApplication.shared.applicationIconBadgeNumber = 0
+        
         return true
     }
     
@@ -99,6 +102,54 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         print("APNs 토큰 등록 실패: \(error.localizedDescription)")
     }
     
+    // MARK: -포그라운드/백그라운드 관계없이 모든 FCM 메시지 처리
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        
+        print("FCM 메시지 수신: \(userInfo)")
+        
+        // 알림 내용 추출
+        var body = "새로운 알림"
+        if let aps = userInfo["aps"] as? [String: Any],
+           let alert = aps["alert"] as? [String: Any],
+           let alertBody = alert["body"] as? String {
+            body = alertBody
+        } else if let directBody = userInfo["body"] as? String {
+            body = directBody
+        }
+        
+        // timestamp 추출
+        var timestamp = DateFormatter().string(from: Date()) // 기본값: 현재 시간
+        if let fcmTimestamp = userInfo["timestamp"] as? String {
+            timestamp = fcmTimestamp // "12월 1일" 같은 형태로 바로 사용
+        }
+        
+        // 항상 저장 (
+        let notification = NotificationItem(
+            image: "bell.fill",
+            content: body,
+            date: timestamp // 수정된 부분: timestamp 사용
+        )
+        
+        NotificationManager.shared.saveNotification(notification)
+        
+        let currentBadgeCount = UIApplication.shared.applicationIconBadgeNumber
+        UIApplication.shared.applicationIconBadgeNumber = currentBadgeCount + 1
+        
+        print("현재 Badge 개수: \(currentBadgeCount + 1)")
+        
+        completionHandler(.newData)
+    }
+    
+    // MARK: - 앱이 백그라운드에서 포그라운드로 돌아올 때
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        UIApplication.shared.applicationIconBadgeNumber = 0
+    }
+    
+    // MARK: - 앱이 포그라운드로 진입할 때
+    func applicationWillEnterForeground(_ application: UIApplication) {
+        UIApplication.shared.applicationIconBadgeNumber = 0
+    }
+    
     // MARK: UISceneSession Lifecycle
     
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
@@ -131,13 +182,10 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                                 didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
         
-        print("알림 탭됨 - 앱 활성화")
-        
         // 알림 탭하면 그냥 앱만 활성화 (특별한 처리 없음)
         // 앱이 꺼져있으면 → 앱 실행
         // 앱이 백그라운드에 있으면 → 앱을 포그라운드로
         // 앱이 이미 실행중이면 → 그대로 유지
-        
         completionHandler()
     }
 }

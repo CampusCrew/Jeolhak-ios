@@ -11,17 +11,20 @@ class NotificationContentView: UIView {
     
     private var image: String
     private var content: String
-    private let color: UIColor!
     
-    init(image: String, content: String, color: UIColor){
+    init(image: String, content: String){
         self.image = image
         self.content = content
-        self.color = color
         
         super.init(frame: .zero)
         
         setupView()
         setupContent()
+    }
+    
+    // NotificationItem을 받는 편의 초기화
+    convenience init(notification: NotificationItem) {
+        self.init(image: notification.image, content: notification.content)
     }
     
     /** View 배경 세팅 */
@@ -30,7 +33,7 @@ class NotificationContentView: UIView {
         
         layer.cornerRadius = 20
         layer.borderWidth = 0.5
-        layer.borderColor = UIColor.mainPink.cgColor
+        layer.borderColor = UIColor.systemPink.cgColor // .mainPink 대신 systemPink 사용
         
         // 그림자
         layer.shadowColor = UIColor.black.cgColor
@@ -43,7 +46,7 @@ class NotificationContentView: UIView {
     private func setupContent(){
         // 아이콘 배경
         let iconBackground = UIView()
-        iconBackground.backgroundColor = color
+        iconBackground.backgroundColor = .mainPink
         iconBackground.layer.cornerRadius = 20
         iconBackground.clipsToBounds = true
         iconBackground.translatesAutoresizingMaskIntoConstraints = false
@@ -61,11 +64,12 @@ class NotificationContentView: UIView {
             icon.widthAnchor.constraint(equalToConstant: 20),
             icon.heightAnchor.constraint(equalToConstant: 20)
         ])
+        
         // 텍스트
         let label = UILabel()
         label.text = content
-        label.font = UIFont(name: "Jua-Regular", size: 20)
-        label.textColor = .mainPink
+        label.font = UIFont(name: "Jua-Regular", size: 14) ?? UIFont.systemFont(ofSize: 14) // 폰트가 없을 경우 대체
+        label.textColor = .systemPink // .mainPink 대신 systemPink 사용
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         
@@ -89,9 +93,7 @@ class NotificationContentView: UIView {
         ])
     }
     
-    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
 }
