@@ -20,6 +20,4 @@ enum APIConstants {
     static let getStores = baseURL + "/stores"
     // POST /stores (가게 정보 입력하기)
     static let postStores = baseURL + "/stores"
-    // POST /notify (토큰 전달하기)
-    static let postToken = baseURL + "/notify"
 }
