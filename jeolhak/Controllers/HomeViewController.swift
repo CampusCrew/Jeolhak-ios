@@ -94,51 +94,6 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         // 지도 출력
         MapManager.shared.setMapView(mapContainerView.customMapView.mapView)
         
-        // "현재 위치에서 검색" : 카메라 이동 종료 시 카메라 위치 출력 (임시적으로 사용 안함)
-//        MapManager.shared.onCameraIdle = { [weak self] cameraPosition in
-//            guard let self = self else { return }
-//            
-//            print("사용자가 지도 움직인 뒤 위치 : \(cameraPosition.target.lat), \(cameraPosition.target.lng)")
-//            
-//            // 출력되지 않으면 다시 출력 X
-//            guard self.moveMapResearchView == nil else { return }
-//            
-//            let refreshView = HomeMoveMapResearchView()
-//            refreshView.translatesAutoresizingMaskIntoConstraints = false
-//            refreshView.alpha = 0 // 처음엔 투명
-//            
-//            self.view.addSubview(refreshView)
-//            
-//            refreshView.onTap = {
-//                print("현재 위치 제검색 실행")
-//                self.fetchStores(latitude: cameraPosition.target.lat,
-//                                 longitude: cameraPosition.target.lng,
-//                                 self.department,
-//                                 self.major,
-//                                 self.mapContainerView)
-//                
-//                // 검색 후 뷰 제거
-//                UIView.animate(withDuration: 0.3, animations: {
-//                    refreshView.alpha = 0
-//                }, completion: { _ in
-//                    refreshView.removeFromSuperview()
-//                    self.moveMapResearchView = nil
-//                })
-//            }
-//            
-//            self.view.addSubview(refreshView)
-//            NSLayoutConstraint.activate([
-//                refreshView.topAnchor.constraint(equalTo: self.searchBarContainer.bottomAnchor, constant: 10),
-//                refreshView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor)
-//            ])
-//            
-//            self.moveMapResearchView = refreshView
-//            
-//            UIView.animate(withDuration: 0.3) {
-//                refreshView.alpha = 1
-//            }
-//        }
-        
         // 검색, 단과/학과 정보 출력
         setupSearchBarAndUserInfo()
         
@@ -391,3 +346,48 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         ])
     }
 }
+
+//         "현재 위치에서 검색" : 카메라 이동 종료 시 카메라 위치 출력 (임시적으로 사용 안함)
+//        MapManager.shared.onCameraIdle = { [weak self] cameraPosition in
+//            guard let self = self else { return }
+//
+//            print("사용자가 지도 움직인 뒤 위치 : \(cameraPosition.target.lat), \(cameraPosition.target.lng)")
+//
+//            // 출력되지 않으면 다시 출력 X
+//            guard self.moveMapResearchView == nil else { return }
+//
+//            let refreshView = HomeMoveMapResearchView()
+//            refreshView.translatesAutoresizingMaskIntoConstraints = false
+//            refreshView.alpha = 0 // 처음엔 투명
+//
+//            self.view.addSubview(refreshView)
+//
+//            refreshView.onTap = {
+//                print("현재 위치 제검색 실행")
+//                self.fetchStores(latitude: cameraPosition.target.lat,
+//                                 longitude: cameraPosition.target.lng,
+//                                 self.department,
+//                                 self.major,
+//                                 self.mapContainerView)
+//
+//                // 검색 후 뷰 제거
+//                UIView.animate(withDuration: 0.3, animations: {
+//                    refreshView.alpha = 0
+//                }, completion: { _ in
+//                    refreshView.removeFromSuperview()
+//                    self.moveMapResearchView = nil
+//                })
+//            }
+//
+//            self.view.addSubview(refreshView)
+//            NSLayoutConstraint.activate([
+//                refreshView.topAnchor.constraint(equalTo: self.searchBarContainer.bottomAnchor, constant: 10),
+//                refreshView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor)
+//            ])
+//
+//            self.moveMapResearchView = refreshView
+//
+//            UIView.animate(withDuration: 0.3) {
+//                refreshView.alpha = 1
+//            }
+//        }
