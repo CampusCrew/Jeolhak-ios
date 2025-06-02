@@ -32,6 +32,10 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
     // 할인 기간 선택 라벨
     private let saleDateFieldLabel = UILabel()
     
+    // 로딩 인디케이터
+    private var loadingIndicator: UIActivityIndicatorView?
+    private var loadingBackgroundView: UIView?
+    
     // DatePickerManager 사용
     private var datePickerManager: DatePickerManager?
     
@@ -127,7 +131,7 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
         ])
         
         // Add fields
-        stackView.addArrangedSubview(makeField(title: "가게 이름", placeholder: "예) 모쿠모쿠"))
+        stackView.addArrangedSubview(makeField(title: "가게 이름", placeholder: "최대한 자세히 입력해주세요! 예) 다사랑치킨피자 원대본점"))
         stackView.addArrangedSubview(makeClickableField(title: "가게 주소", placeholder: "예) 익산시 무왕로 18-1길", label: addressFieldLabel, action: #selector(handleMapButtonTapped)))
         stackView.addArrangedSubview(makeClickableField(title: "할인 대상", placeholder: "예) 창의공과대학 컴퓨터소프트웨어공학과", label: targetFieldLabel, action: #selector(handleTargetButtonTapped)))
         stackView.addArrangedSubview(makeClickableField(title: "할인 기간", placeholder: "예) 6월 1일 ~ 7월 10일", label: saleDateFieldLabel, action: #selector(handleSaleInfoButtonTapped)))
@@ -240,9 +244,35 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
     
     // MARK: - 등록 이벤트
     
+    // 등록 전 확인
     @objc private func onRegisterButtonTapped() {
         print("등록 버튼이 눌렸어요!")
         
+        // 1. 등록 확인 알람 표시
+        let confirmAlert = UIAlertController(
+            title: "가게 등록",
+            message: "정말 등록하시겠습니까?",
+            preferredStyle: .alert
+        )
+        
+        // 취소 버튼
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel) { _ in
+            print("등록 취소됨")
+        }
+        
+        // 확인 버튼
+        let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
+            self?.performRegistration()
+        }
+        
+        confirmAlert.addAction(cancelAction)
+        confirmAlert.addAction(confirmAction)
+        
+        parentViewController?.present(confirmAlert, animated: true)
+    }
+    
+    // 서버로 POST 요청
+    private func performRegistration() {
         // textFields 배열 순서: 가게 이름, 기타 사항, 요청자
         guard textFields.count >= 3 else {
             print("❌ 텍스트필드 수 부족")
@@ -300,7 +330,7 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
             return
         }
         
-        // partDivision과 partName 분리 로직 수정
+        // partDivision과 partName 분리 로직
         let partDivision: String
         let partName: String
         
@@ -347,18 +377,137 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
             requester: requester
         )
         
-        // MARK: - 가게 등록 진행 (POST, /stores)
+        // 로딩 인디케이터 표시
+        showLoadingIndicator()
+        
         NetworkManager.shared.requestPOST(
             urlString: APIConstants.postStores,
             parameters: payload
-        ) { (result: Result<UploadStoreResponseDTO, APIError>) in
-            switch result {
-            case .success(let response):
-                print("✅ 성공적으로 등록되었어요!: \(response)")
-            case .failure(let error):
-                print("❌ 등록에 실패했어요. : \(error)")
+        ) { [weak self] (result: Result<UploadStoreResponseDTO, APIError>) in
+            DispatchQueue.main.async {
+                // 로딩 인디케이터 숨기기
+                self?.hideLoadingIndicator()
+                self?.handleRegistrationResponse(result: result)
             }
         }
+    }
+    
+    // 서버 응답 처리
+    private func handleRegistrationResponse(result: Result<UploadStoreResponseDTO, APIError>) {
+        switch result {
+        case .success(let response):
+            print("서버 응답: \(response)")
+            
+            switch response.code {
+            case 1:
+                // 성공 - HomeViewController로 이동
+                showSuccessAlert(message: "성공적으로 등록되었어요!") { [weak self] in
+                    self?.navigateToHome()
+                }
+                
+            case 2:
+                // 중복된 가게 - 알람만 표시
+                showAlert(message: "중복된 가게가 있어요!")
+                
+            case 3:
+                // 서버 오류 - 알람만 표시
+                showAlert(message: "네트워크 문제 혹은 서버에 문제가 발생했어요!")
+                
+            default:
+                // 예상치 못한 응답 코드
+                showAlert(message: "알 수 없는 오류가 발생했어요!")
+            }
+            
+        case .failure(let error):
+            print("❌ 등록에 실패했어요. : \(error)")
+            showAlert(message: "네트워크 문제 혹은 서버에 문제가 발생했어요!")
+        }
+    }
+    
+    // 가게 등록 성공 시
+    private func showSuccessAlert(message: String, completion: @escaping () -> Void) {
+        let alert = UIAlertController(title: "알림", message: message, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "확인", style: .default) { _ in
+            completion()
+        }
+        alert.addAction(okAction)
+        parentViewController?.present(alert, animated: true)
+    }
+    
+    // 홈 VC로 이동
+    private func navigateToHome() {
+        // 새로운 가게 등록 알림
+        NotificationCenter.default.post(name: .didRegisterNewStore, object: nil)
+        
+        // UIView에서 부모 뷰 컨트롤러 찾기
+        guard let parentViewController = self.findViewController() else {
+            print("부모 뷰 컨트롤러를 찾을 수 없습니다.")
+            return
+        }
+        
+        // MainTabBar의 첫 번째 탭(HomeViewController)으로 이동
+        if let tabBarController = parentViewController.tabBarController {
+            tabBarController.selectedIndex = 0
+            
+            // 현재 뷰 컨트롤러를 pop하여 네비게이션 스택에서 제거
+            if let navigationController = parentViewController.navigationController {
+                navigationController.popViewController(animated: true)
+            }
+        } else {
+            print("TabBarController를 찾을 수 없습니다.")
+        }
+    }
+    
+    // UIView에서 부모 VC 찾기
+    private func findViewController() -> UIViewController? {
+        var responder: UIResponder? = self
+        while responder != nil {
+            responder = responder?.next
+            if let viewController = responder as? UIViewController {
+                return viewController
+            }
+        }
+        return nil
+    }
+    
+    // MARK: - 할인 가게 정보 등록 폼 초기화
+    private func resetFormData() {
+        // 텍스트 필드 초기화 (가게 이름, 기타 사항, 요청자)
+        for textField in textFields {
+            textField.text = ""
+        }
+        
+        // 클릭 필드들 초기화
+        addressFieldLabel.text = "예) 익산시 무왕로 18-1길"
+        addressFieldLabel.textColor = .gray
+        
+        targetFieldLabel.text = "예) 창의공과대학 컴퓨터소프트웨어공학과"
+        targetFieldLabel.textColor = .gray
+        
+        saleDateFieldLabel.text = "예) 6월 1일 ~ 7월 10일"
+        saleDateFieldLabel.textColor = .gray
+        
+        // 할인 정보 초기화
+        if let textView = discountInfoTextView {
+            textView.text = "예) 30,000원 이상 결제 시 10% 할인"
+            textView.textColor = .gray
+            
+            // TextView 높이도 기본값으로 복원
+            discountInfoHeightConstraint?.constant = 42
+            UIView.animate(withDuration: 0.2) {
+                self.layoutIfNeeded()
+            }
+        }
+        
+        // 할인 대상 초기화
+        selectedTarget = "재학생"
+        updateCheckboxSelection(stack: targetStack, selected: "재학생")
+        
+        // 키보드 숨기기
+        self.endEditing(true)
+        
+        // 스크롤 위치 맨 위로 이동
+        scrollView.setContentOffset(CGPoint.zero, animated: true)
     }
     
     // MARK: - 필수 입력 필드 검증
@@ -556,6 +705,7 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
     
     // MARK: - 가게 주소 입력 버튼 클릭 핸들러
     @objc private func handleMapButtonTapped() {
+        self.endEditing(true)
         print("가게 주소 입력 버튼 클릭")
         onMapButtonTapped?()
         
@@ -582,6 +732,7 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
     
     // MARK: - 할인 대상 입력 버튼 클릭 핸들러
     @objc private func handleTargetButtonTapped() {
+        self.endEditing(true)
         print("할인 대상 입력 버튼 클릭")
         if let presentedVC = parentViewController?.presentedViewController as? StoreSelectTargetViewController {
             presentedVC.dismiss(animated: true)
@@ -600,6 +751,7 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
     
     // MARK: - 할인 기간 입력 버튼 클릭 핸들러 (DatePickerManager 사용)
     @objc private func handleSaleInfoButtonTapped() {
+        self.endEditing(true)
         print("할인 기간 입력 버튼 클릭")
         datePickerManager?.showDatePicker()
     }
@@ -645,6 +797,69 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
     
     @objc private func dismissKeyboard() {
         self.endEditing(true)
+    }
+    
+    // MARK: - 로딩 인디케이터 활성화
+    private func showLoadingIndicator() {
+        // 이미 표시 중이면 리턴
+        if loadingBackgroundView != nil { return }
+        
+        // 백그라운드 뷰 생성
+        let backgroundView = UIView()
+        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        backgroundView.translatesAutoresizingMaskIntoConstraints = false
+        
+        // 인디케이터 생성
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.color = .white
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        indicator.startAnimating()
+        
+        // 로딩 텍스트 라벨
+        let loadingLabel = UILabel()
+        loadingLabel.text = "등록 중..."
+        loadingLabel.textColor = .white
+        loadingLabel.font = UIFont(name: "Jua-Regular", size: 16)
+        loadingLabel.textAlignment = .center
+        loadingLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        // 뷰 추가
+        backgroundView.addSubview(indicator)
+        backgroundView.addSubview(loadingLabel)
+        self.addSubview(backgroundView)
+        
+        // 제약 조건 설정
+        NSLayoutConstraint.activate([
+            backgroundView.topAnchor.constraint(equalTo: self.topAnchor),
+            backgroundView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            backgroundView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+            backgroundView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+            
+            indicator.centerXAnchor.constraint(equalTo: backgroundView.centerXAnchor),
+            indicator.centerYAnchor.constraint(equalTo: backgroundView.centerYAnchor, constant: -20),
+            
+            loadingLabel.topAnchor.constraint(equalTo: indicator.bottomAnchor, constant: 16),
+            loadingLabel.centerXAnchor.constraint(equalTo: backgroundView.centerXAnchor)
+        ])
+        
+        // 참조 저장
+        loadingIndicator = indicator
+        loadingBackgroundView = backgroundView
+        
+        // 사용자 인터랙션 비활성화
+        self.isUserInteractionEnabled = false
+    }
+    
+    // MARK: - 로딩 인디케이터 비활성화
+    private func hideLoadingIndicator() {
+        loadingIndicator?.stopAnimating()
+        loadingBackgroundView?.removeFromSuperview()
+        
+        loadingIndicator = nil
+        loadingBackgroundView = nil
+        
+        // 사용자 인터랙션 활성화
+        self.isUserInteractionEnabled = true
     }
     
 }

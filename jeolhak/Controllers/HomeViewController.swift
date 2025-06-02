@@ -70,6 +70,14 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
             object: nil
         )
         
+        // 새 가게 등록 완료 알림 수신 등록
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleNewStoreRegistered),
+            name: .didRegisterNewStore,
+            object: nil
+        )
+        
         department = UserDefaults.standard.string(forKey: "department") ?? "없음"
         major = UserDefaults.standard.string(forKey: "major") ?? "없음"
         
@@ -115,16 +123,12 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
         // 현재 위치 기반 API 요청 다시 진행 (변경된 단과, 학과 정보)
         if let currentLocation = MapManager.shared.currentLocation {
             print("현재 위치 기반 단과, 학과 업데이트")
-            fetchStores(latitude: 35.960804, // 테스트로 다사랑에서 확인하기
-                        longitude: 126.957785,
+            
+            fetchStores(latitude: currentLocation.latitude,
+                        longitude: currentLocation.longitude,
                         department,
                         major,
                         mapContainerView)
-            //            fetchStores(latitude: currentLocation.latitude,
-            //                        longitude: currentLocation.longitude,
-            //                        department,
-            //                        major,
-            //                        mapContainerView)
         } else {
             print("현재 위치 불러오기 실패. 다사랑 기준 단과, 학과 업데이트")
             fetchStores(latitude: 35.960804,
@@ -137,6 +141,29 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
     
     deinit {
         NotificationCenter.default.removeObserver(self)
+    }
+    
+    // 새 가게 등록 완료 시 호출되는 메서드
+    @objc private func handleNewStoreRegistered() {
+        department = UserDefaults.standard.string(forKey: "department") ?? "없음"
+        major = UserDefaults.standard.string(forKey: "major") ?? "없음"
+        
+        if let currentLocation = MapManager.shared.currentLocation {
+            print("현재 위치 기반 단과, 학과 업데이트")
+            
+            fetchStores(latitude: currentLocation.latitude,
+                        longitude: currentLocation.longitude,
+                        department,
+                        major,
+                        mapContainerView)
+        } else {
+            print("현재 위치 불러오기 실패. 다사랑 기준 단과, 학과 업데이트")
+            fetchStores(latitude: 35.960804,
+                        longitude: 126.957785,
+                        department,
+                        major,
+                        mapContainerView)
+        }
     }
     
     /** 사용자 위치 근방 할인 가게 호출 */
@@ -344,6 +371,12 @@ class HomeViewController: UIViewController, CLLocationManagerDelegate {
             searchBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40),
             searchBarView.heightAnchor.constraint(equalToConstant: 50)
         ])
+    }
+    
+    // MARK: - 검색바 포커싱 해제 (키보드 내리기)
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
+        view.endEditing(true) // 모든 TextField의 포커스 해제
     }
 }
 
