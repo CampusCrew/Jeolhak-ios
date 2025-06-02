@@ -402,6 +402,7 @@ class UploadFormView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate {
             case 1:
                 // 성공 - HomeViewController로 이동
                 showSuccessAlert(message: "성공적으로 등록되었어요!") { [weak self] in
+                    self?.resetFormData()
                     self?.navigateToHome()
                 }
                 
