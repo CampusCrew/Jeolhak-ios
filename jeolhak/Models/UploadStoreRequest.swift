@@ -25,5 +25,6 @@ struct UploadStoreRequestDTO: Encodable {
 
 // 응답 모델
 struct UploadStoreResponseDTO: Decodable {
+    let code: Int
     let message: String
 }

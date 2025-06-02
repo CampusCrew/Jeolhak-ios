@@ -12,7 +12,10 @@ class NotificationViewController: UIViewController {
     private let dateView = NotificationDateView(date: "오늘")
     private let scrollView = UIScrollView()
     private let stackView = UIStackView()
+    
     private let emptyStateLabel = UILabel()
+    private var emptyStateIcon: UIImageView?
+    private var emptyStateContainer: UIView?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -71,19 +74,56 @@ class NotificationViewController: UIViewController {
         navigationItem.rightBarButtonItem = clearButton
     }
     
+    // MARK: - 알람이 없을 때
     private func setupEmptyState() {
-        emptyStateLabel.text = "알림이 없습니다"
+        // 라벨 설정
+        emptyStateLabel.text = "알람이 오지 않았어요!"
         emptyStateLabel.textColor = .gray
-        emptyStateLabel.font = UIFont.systemFont(ofSize: 16)
+        emptyStateLabel.font = UIFont(name: "Jua-Regular", size: 24) ?? UIFont.systemFont(ofSize: 24)
         emptyStateLabel.textAlignment = .center
         emptyStateLabel.isHidden = true
         
-        stackView.addSubview(emptyStateLabel)
+        // 아이콘 설정
+        let iconImageView = UIImageView()
+        iconImageView.image = UIImage(systemName: "cloud.rain.fill")
+        iconImageView.tintColor = .mainPink
+        iconImageView.contentMode = .scaleAspectFit
+        iconImageView.isHidden = true
+        
+        // 컨테이너 뷰 생성 (라벨과 아이콘을 담을 용도)
+        let containerView = UIView()
+        containerView.isHidden = true
+        
+        // 서브뷰 추가
+        view.addSubview(containerView)
+        containerView.addSubview(emptyStateLabel)
+        containerView.addSubview(iconImageView)
+        
+        // Auto Layout 설정
+        containerView.translatesAutoresizingMaskIntoConstraints = false
         emptyStateLabel.translatesAutoresizingMaskIntoConstraints = false
+        iconImageView.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
-            emptyStateLabel.centerXAnchor.constraint(equalTo: stackView.centerXAnchor),
-            emptyStateLabel.topAnchor.constraint(equalTo: stackView.topAnchor, constant: 50)
+            // 컨테이너 뷰를 view 중앙에 배치
+            containerView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            containerView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 40),
+            
+            // 라벨 제약조건
+            emptyStateLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            emptyStateLabel.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            
+            // 아이콘 제약조건 (라벨 오른쪽 10pt 떨어진 위치)
+            iconImageView.leadingAnchor.constraint(equalTo: emptyStateLabel.trailingAnchor, constant: 10),
+            iconImageView.centerYAnchor.constraint(equalTo: emptyStateLabel.centerYAnchor),
+            iconImageView.widthAnchor.constraint(equalToConstant: 25),
+            iconImageView.heightAnchor.constraint(equalToConstant: 25),
+            iconImageView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor)
         ])
+        
+        // 참조 저장 (나중에 show/hide 할 때 사용하기 위해)
+        self.emptyStateContainer = containerView
+        self.emptyStateIcon = iconImageView
     }
     
     private func setupObservers() {
@@ -151,9 +191,13 @@ class NotificationViewController: UIViewController {
         let notifications = NotificationManager.shared.loadNotifications()
         
         if notifications.isEmpty {
+            emptyStateContainer?.isHidden = false
             emptyStateLabel.isHidden = false
+            emptyStateIcon?.isHidden = false
         } else {
+            emptyStateContainer?.isHidden = true
             emptyStateLabel.isHidden = true
+            emptyStateIcon?.isHidden = true
             
             // 최신순으로 표시
             for notification in notifications.reversed() {
@@ -189,7 +233,9 @@ class NotificationViewController: UIViewController {
     
     @objc private func handleNotificationCleared() {
         stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        emptyStateContainer?.isHidden = false
         emptyStateLabel.isHidden = false
+        emptyStateIcon?.isHidden = false
     }
     
     @objc private func clearAllTapped() {

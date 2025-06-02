@@ -132,10 +132,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         
         NotificationManager.shared.saveNotification(notification)
         
-        let currentBadgeCount = UIApplication.shared.applicationIconBadgeNumber
-        UIApplication.shared.applicationIconBadgeNumber = currentBadgeCount + 1
-        
-        print("현재 Badge 개수: \(currentBadgeCount + 1)")
+        if application.applicationState == .active {
+            // 앱이 포그라운드(인앱)에 있을 때는 badge를 0으로 유지
+            UIApplication.shared.applicationIconBadgeNumber = 0
+            print("앱이 포그라운드 상태 - Badge를 0으로 유지")
+        } else {
+            // 앱이 백그라운드나 비활성 상태일 때만 badge 증가
+            let currentBadgeCount = UIApplication.shared.applicationIconBadgeNumber
+            UIApplication.shared.applicationIconBadgeNumber = currentBadgeCount + 1
+            print("앱이 백그라운드 상태 - Badge 개수: \(currentBadgeCount + 1)")
+        }
         
         completionHandler(.newData)
     }

@@ -104,8 +104,10 @@ class NetworkManager {
             completion(.success(value))
         case .failure:
             if let statusCode = response.response?.statusCode, !(200...299).contains(statusCode) {
+                print("invalidResponse 에러 핸들링 : ", response.result)
                 completion(.failure(.invalidResponse))
             } else {
+                print("requestFailed 에러 핸들링 : ", response.result)
                 completion(.failure(.requestFailed))
             }
         }

@@ -13,13 +13,18 @@ extension Notification.Name {
     // 카드뷰 닫힘 감지
     static let didCloseCardView = Notification.Name("didCloseCardView")
     
+    // 새로운 가게 등록
+    static let didRegisterNewStore = Notification.Name("didRegisterNewStore")
+    
     // 단과, 학과 변경 감지
     static let didUpdateUserSelection = Notification.Name("didUpdateUserSelection")
     
     // FCM 알람 수신 감지
     static let didReceivePushNotification = Notification.Name("didReceivePushNotification")
+    
     // 알람 업데이트 감지
     static let notificationListUpdated = Notification.Name("notificationListUpdated")
+    
     // 알람 삭제 감지
     static let notificationListCleared = Notification.Name("notificationListCleared")
     

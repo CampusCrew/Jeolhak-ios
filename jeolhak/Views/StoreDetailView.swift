@@ -73,30 +73,30 @@ class StoreDetailView: UIView {
         divider.layer.cornerRadius = 2
         
         saleInfoTitle.text = "할인 정보"
-        saleInfoTitle.font = UIFont(name: "Jua-Regular", size: 20)
+        saleInfoTitle.font = UIFont(name: "Jua-Regular", size:18)
         saleInfoTitle.textColor = .mainPink
         
         saleInfo.text = store.saleInfo
-        saleInfo.font = UIFont(name: "Jua-Regular", size: 18)
+        saleInfo.font = UIFont(name: "Jua-Regular", size: 16)
         saleInfo.textColor = .darkGray
         saleInfo.numberOfLines = 0
         
         saleDateTitle.text = "할인 기간"
-        saleDateTitle.font = UIFont(name: "Jua-Regular", size: 20)
+        saleDateTitle.font = UIFont(name: "Jua-Regular", size: 18)
         saleDateTitle.textColor = .mainPink
         
         // 날짜 형식 변환 유틸리티
         let formatted = DateFormatterUtils.formatSaleDate(store.saleDate)
         saleDate.text = formatted
-        saleDate.font = UIFont(name: "Jua-Regular", size: 18)
+        saleDate.font = UIFont(name: "Jua-Regular", size: 16)
         saleDate.textColor = .darkGray
         
         targetTitle.text = "할인 대상"
-        targetTitle.font = UIFont(name: "Jua-Regular", size: 20)
+        targetTitle.font = UIFont(name: "Jua-Regular", size: 18)
         targetTitle.textColor = .mainPink
         
         shopDepartment.text = store.department
-        shopDepartment.font = UIFont(name: "Jua-Regular", size: 18)
+        shopDepartment.font = UIFont(name: "Jua-Regular", size: 16)
         shopDepartment.textColor = .darkGray
         
         shopMajor.text = store.major == "" ? "전체학생" : store.major
@@ -104,11 +104,11 @@ class StoreDetailView: UIView {
         shopMajor.textColor = .darkGray
         
         etcTitle.text = "설명(기타)"
-        etcTitle.font = UIFont(name: "Jua-Regular", size: 20)
+        etcTitle.font = UIFont(name: "Jua-Regular", size: 18)
         etcTitle.textColor = .mainPink
         
         etc.text = store.etc
-        etc.font = UIFont(name: "Jua-Regular", size: 18)
+        etc.font = UIFont(name: "Jua-Regular", size: 16)
         etc.textColor = .darkGray
         etc.numberOfLines = 0
         
@@ -133,7 +133,7 @@ class StoreDetailView: UIView {
             shopImage.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
             shopImage.leadingAnchor.constraint(equalTo: leadingAnchor),
             shopImage.trailingAnchor.constraint(equalTo: trailingAnchor),
-            shopImage.heightAnchor.constraint(equalToConstant: 200),
+            shopImage.heightAnchor.constraint(equalToConstant: 250),
             
             shopName.topAnchor.constraint(equalTo: shopImage.bottomAnchor, constant: 15),
             shopName.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
