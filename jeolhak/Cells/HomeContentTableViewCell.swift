@@ -15,11 +15,13 @@ class HomeContentTableViewCell: UITableViewCell {
     static let identifier = "HomeContentTableViewCell"
     
     // MARK: - UI 초기화
+    private var containerView = UIView()
     private var shopImageView = UIImageView()
     private var shopTitleLabel = UILabel()
     private var shopAddressLabel = UILabel()
-    private var shopCategoryLabel = UILabel()
+    private var shopCategoryLabel = PaddingLabel()
     private var shopSaleInfoLabel = UILabel()
+
     
     // 가게 이름 탭 클로저
     var onTitleTapped: (() -> Void)?
@@ -36,24 +38,37 @@ class HomeContentTableViewCell: UITableViewCell {
     // MARK: - 뷰 세팅
     private func setupViews(){
         selectionStyle = .none
+        contentView.backgroundColor = .clear
+        backgroundColor = .clear
         
-        // (임시) 다크모드 무시하고 배경 강제 white
-        contentView.backgroundColor = .white
+        // 컨테이너 뷰 설정
+        containerView.backgroundColor = .white
+        containerView.layer.cornerRadius = 15
+        containerView.layer.masksToBounds = false
         
-        // 가게 사진 - 개선된 설정
-        shopImageView.contentMode = .scaleAspectFill  // scaleAspectFit → scaleAspectFill로 변경
+        // 그림자 효과 추가
+        containerView.layer.shadowColor = UIColor.black.cgColor
+        containerView.layer.shadowOpacity = 0.2
+        containerView.layer.shadowOffset = CGSize(width: 1, height: 3)
+        containerView.layer.shadowRadius = 6
+        
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+        
+        // 가게 사진 - 상단에 배치
+        shopImageView.contentMode = .scaleAspectFill
         shopImageView.clipsToBounds = true
-        shopImageView.backgroundColor = UIColor.systemGray6  // 로딩 중 배경색
-        shopImageView.layer.cornerRadius = 20  // 직접 cornerRadius 설정
+        shopImageView.backgroundColor = UIColor.systemGray6
+        shopImageView.layer.cornerRadius = 15
+        shopImageView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner] // 상단 모서리만 라운드
         shopImageView.translatesAutoresizingMaskIntoConstraints = false
         
         // 가게 이름 (Title)
-        shopTitleLabel.font = UIFont(name: "Jua-Regular", size: 16)
-        shopTitleLabel.textColor = .black
+        shopTitleLabel.font = UIFont(name: "Jua-Regular", size: 18)
+        shopTitleLabel.textColor = .mainPink
         shopTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         
         // 가게 주소
-        shopAddressLabel.font = UIFont(name: "Jua-Regular", size: 11)
+        shopAddressLabel.font = UIFont(name: "Jua-Regular", size: 13)
         shopAddressLabel.textColor = .lightGray
         shopAddressLabel.translatesAutoresizingMaskIntoConstraints = false
         
@@ -62,57 +77,63 @@ class HomeContentTableViewCell: UITableViewCell {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(titleTapped))
         shopTitleLabel.addGestureRecognizer(tapGesture)
         
-        // 가게 분류
-        shopCategoryLabel.font = UIFont(name: "Jua-Regular", size: 14)
-        shopCategoryLabel.textColor = .gray
+        // 가게 분류 - 우측 상단에 배지 스타일
+        shopCategoryLabel.font = UIFont(name: "Jua-Regular", size: 12)
+        shopCategoryLabel.textColor = .mainPink
+        shopCategoryLabel.backgroundColor = UIColor.mainPink.withAlphaComponent(0.1)
+        shopCategoryLabel.padding = UIEdgeInsets(top: 0, left: 15, bottom: 0, right: 15)
+        shopCategoryLabel.textAlignment = .center
+        shopCategoryLabel.layer.cornerRadius = 10
+        shopCategoryLabel.layer.masksToBounds = true
         shopCategoryLabel.translatesAutoresizingMaskIntoConstraints = false
         
         // 가게 설명
         shopSaleInfoLabel.font = UIFont(name: "Jua-Regular", size: 14)
         shopSaleInfoLabel.textColor = .darkGray
-        shopSaleInfoLabel.numberOfLines = 2
+        shopSaleInfoLabel.numberOfLines = 1
+        shopSaleInfoLabel.lineBreakMode = .byTruncatingTail
         shopSaleInfoLabel.translatesAutoresizingMaskIntoConstraints = false
         
-        // 하단 분류 선
-        let line = UIView()
-        line.backgroundColor = .mainPink
-        line.translatesAutoresizingMaskIntoConstraints = false
-        
-        [shopImageView, shopTitleLabel, shopAddressLabel, shopCategoryLabel, shopSaleInfoLabel, line].forEach {
-            contentView.addSubview($0)
+        // 뷰 계층 구조 설정
+        contentView.addSubview(containerView)
+        [shopImageView, shopTitleLabel, shopAddressLabel, shopCategoryLabel, shopSaleInfoLabel].forEach {
+            containerView.addSubview($0)
         }
         
-        // 레이아웃 설정 (제약조건) - 이미지 비율 고정
+        // 레이아웃 설정
         NSLayoutConstraint.activate([
-            // 가게 사진 - 300:180 비율로 고정
-            shopImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
-            shopImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
-            shopImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
-            shopImageView.heightAnchor.constraint(equalTo: shopImageView.widthAnchor, multiplier: 180.0/300.0), // 3:5 비율 고정
+            // 컨테이너 뷰
+            containerView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10),
+            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10),
+            containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
             
-            // 가게 이름
-            shopTitleLabel.topAnchor.constraint(equalTo: shopImageView.bottomAnchor, constant: 8),
-            shopTitleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
+            // 가게 사진 - 상단 전체
+            shopImageView.topAnchor.constraint(equalTo: containerView.topAnchor),
+            shopImageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            shopImageView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            shopImageView.heightAnchor.constraint(equalToConstant: 200),
             
-            // 가게 주소
-            shopAddressLabel.centerYAnchor.constraint(equalTo: shopTitleLabel.centerYAnchor),
-            shopAddressLabel.leadingAnchor.constraint(equalTo: shopCategoryLabel.trailingAnchor, constant: 10),
-            
-            // 가게 분류
+            // 가게 분류 - 우측 상단 (텍스트 길이에 따라 동적 크기)
             shopCategoryLabel.centerYAnchor.constraint(equalTo: shopTitleLabel.centerYAnchor),
-            shopCategoryLabel.leadingAnchor.constraint(equalTo: shopTitleLabel.trailingAnchor, constant: 6),
+            shopCategoryLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+            shopCategoryLabel.heightAnchor.constraint(equalToConstant: 20),
             
-            // 가게 설명
-            shopSaleInfoLabel.topAnchor.constraint(equalTo: shopTitleLabel.bottomAnchor, constant: 6),
-            shopSaleInfoLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
-            shopSaleInfoLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
+            // 가게 이름 - 이미지 아래 좌측
+            shopTitleLabel.topAnchor.constraint(equalTo: shopImageView.bottomAnchor, constant: 16),
+            shopTitleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            shopTitleLabel.trailingAnchor.constraint(lessThanOrEqualTo: shopCategoryLabel.leadingAnchor, constant: -8),
             
-            // 하단 분류 선
-            line.topAnchor.constraint(equalTo: shopSaleInfoLabel.bottomAnchor, constant: 12),
-            line.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
-            line.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
-            line.heightAnchor.constraint(equalToConstant: 1),
-            line.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12)
+            // 가게 주소 - 타이틀 아래
+            shopAddressLabel.topAnchor.constraint(equalTo: shopTitleLabel.bottomAnchor, constant: 4),
+            shopAddressLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            shopAddressLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+            
+            // 가게 설명 - 주소 아래
+            shopSaleInfoLabel.topAnchor.constraint(equalTo: shopAddressLabel.bottomAnchor, constant: 8),
+            shopSaleInfoLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            shopSaleInfoLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+            shopSaleInfoLabel.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -16)
         ])
     }
     
@@ -125,19 +146,16 @@ class HomeContentTableViewCell: UITableViewCell {
     // 생성자로 받아온 뷰 초기화
     func configure(shopImage: String, shopTitle: String, shopAddress: String, shopCategory: String, shopSaleInfo: String, shopFavorite: Bool){
         
-        // 방법 1: Kingfisher의 Resizing Processor 사용 (권장)
-        let resizingProcessor = ResizingImageProcessor(referenceSize: CGSize(width: 300, height: 180), mode: .aspectFill)
-        let cornerProcessor = RoundCornerImageProcessor(cornerRadius: 20)
-        let combinedProcessor = resizingProcessor |> cornerProcessor
+        // Kingfisher를 사용한 이미지 로딩
+        let resizingProcessor = ResizingImageProcessor(referenceSize: CGSize(width: 400, height: 200), mode: .aspectFill)
         
         shopImageView.kf.indicatorType = .activity
         shopImageView.kf.setImage(
             with: URL(string: shopImage),
-            placeholder: createPlaceholderImage(),
             options: [
                 .transition(.fade(0.5)),
-                .processor(combinedProcessor),
-                .cacheSerializer(FormatIndicatedCacheSerializer.png) // PNG로 캐시하여 품질 유지
+                .processor(resizingProcessor),
+                .cacheSerializer(FormatIndicatedCacheSerializer.png)
             ]
         )
         
@@ -146,31 +164,19 @@ class HomeContentTableViewCell: UITableViewCell {
         shopCategoryLabel.text = shopCategory
         shopSaleInfoLabel.text = shopSaleInfo
     }
-    
-    // 플레이스홀더 이미지 생성
-    private func createPlaceholderImage() -> UIImage? {
-        let size = CGSize(width: 300, height: 180)
-        UIGraphicsBeginImageContextWithOptions(size, false, 0)
-        defer { UIGraphicsEndImageContext() }
-        
-        UIColor.systemGray5.setFill()
-        UIRectFill(CGRect(origin: .zero, size: size))
-        
-        // 간단한 아이콘이나 텍스트 추가 가능
-        let attrs: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 16),
-            .foregroundColor: UIColor.systemGray3
-        ]
-        let text = "이미지 로딩중..."
-        let textSize = text.size(withAttributes: attrs)
-        let textRect = CGRect(
-            x: (size.width - textSize.width) / 2,
-            y: (size.height - textSize.height) / 2,
-            width: textSize.width,
-            height: textSize.height
-        )
-        text.draw(in: textRect, withAttributes: attrs)
-        
-        return UIGraphicsGetImageFromCurrentImageContext()
+}
+
+// MARK: - 카테고리 라벨 패딩을 위한 서브클래스
+class PaddingLabel: UILabel {
+    var padding = UIEdgeInsets(top: 0, left: 15, bottom: 0, right: 15)
+
+    override func drawText(in rect: CGRect) {
+        super.drawText(in: rect.inset(by: padding))
+    }
+
+    override var intrinsicContentSize: CGSize {
+        let size = super.intrinsicContentSize
+        return CGSize(width: size.width + padding.left + padding.right,
+                      height: size.height + padding.top + padding.bottom)
     }
 }
