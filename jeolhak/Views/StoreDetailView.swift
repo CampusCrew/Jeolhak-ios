@@ -248,9 +248,12 @@ class StoreDetailView: UIView {
             shopDepartmentIcon.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 17),
             shopDepartmentIcon.widthAnchor.constraint(equalToConstant: 16),
             shopDepartmentIcon.heightAnchor.constraint(equalToConstant: 16),
+            
             shopDepartment.topAnchor.constraint(equalTo: targetTitle.bottomAnchor, constant: 10),
             shopDepartment.leadingAnchor.constraint(equalTo: shopDepartmentIcon.trailingAnchor, constant: 10),
+            
             shopMajor.centerYAnchor.constraint(equalTo: shopDepartment.centerYAnchor),
+            shopMajor.topAnchor.constraint(equalTo: targetTitle.bottomAnchor, constant: 10),
             shopMajor.leadingAnchor.constraint(equalTo: shopDepartment.trailingAnchor),
             
             etcTitle.topAnchor.constraint(equalTo: shopMajor.bottomAnchor, constant: 15),

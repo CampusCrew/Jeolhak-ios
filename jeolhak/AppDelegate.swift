@@ -37,9 +37,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         application.registerForRemoteNotifications()
         
         // 앱 처음 실행 시 badge 초기화
-        UIApplication.shared.applicationIconBadgeNumber = 0
+        resetBadgeCount()
         
         return true
+    }
+    
+    // MARK: - Badge 관리 헬퍼 메서드
+    private func resetBadgeCount() {
+        UIApplication.shared.applicationIconBadgeNumber = 0
+        print("Badge 초기화됨")
+    }
+    
+    private func incrementBadgeCount() {
+        let currentBadgeCount = UIApplication.shared.applicationIconBadgeNumber
+        UIApplication.shared.applicationIconBadgeNumber = currentBadgeCount + 1
+        print("Badge 증가: \(currentBadgeCount + 1)")
     }
     
     // MARK: - 푸쉬 알림 권한 요청
@@ -102,10 +114,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         print("APNs 토큰 등록 실패: \(error.localizedDescription)")
     }
     
-    // MARK: -포그라운드/백그라운드 관계없이 모든 FCM 메시지 처리
+    // MARK: - 포그라운드/백그라운드 관계없이 모든 FCM 메시지 처리
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         
         print("FCM 메시지 수신: \(userInfo)")
+        print("현재 앱 상태: \(application.applicationState.rawValue)")
         
         // 알림 내용 추출
         var body = "새로운 알림"
@@ -123,37 +136,58 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
             timestamp = fcmTimestamp // "12월 1일" 같은 형태로 바로 사용
         }
         
-        // 항상 저장 (
+        // 항상 저장
         let notification = NotificationItem(
             image: "bell.fill",
             content: body,
-            date: timestamp // 수정된 부분: timestamp 사용
+            date: timestamp
         )
         
         NotificationManager.shared.saveNotification(notification)
         
-        if application.applicationState == .active {
-            // 앱이 포그라운드(인앱)에 있을 때는 badge를 0으로 유지
-            UIApplication.shared.applicationIconBadgeNumber = 0
-            print("앱이 포그라운드 상태 - Badge를 0으로 유지")
-        } else {
-            // 앱이 백그라운드나 비활성 상태일 때만 badge 증가
-            let currentBadgeCount = UIApplication.shared.applicationIconBadgeNumber
-            UIApplication.shared.applicationIconBadgeNumber = currentBadgeCount + 1
-            print("앱이 백그라운드 상태 - Badge 개수: \(currentBadgeCount + 1)")
-        }
+        // Badge 처리 로직
+        handleBadgeBasedOnAppState(application.applicationState)
         
         completionHandler(.newData)
     }
     
-    // MARK: - 앱이 백그라운드에서 포그라운드로 돌아올 때
-    func applicationDidBecomeActive(_ application: UIApplication) {
-        UIApplication.shared.applicationIconBadgeNumber = 0
+    // MARK: - 앱 상태에 따른 Badge 처리
+    private func handleBadgeBasedOnAppState(_ state: UIApplication.State) {
+        switch state {
+        case .active:
+            // 앱이 포그라운드에서 활성 상태일 때는 badge를 0으로 유지
+            resetBadgeCount()
+            print("앱이 포그라운드 활성 상태 - Badge 초기화")
+            
+        case .background, .inactive:
+            // 앱이 백그라운드나 비활성 상태일 때는 badge 증가
+            incrementBadgeCount()
+            print("앱이 백그라운드/비활성 상태 - Badge 증가")
+            
+        @unknown default:
+            print("알 수 없는 앱 상태")
+        }
     }
     
-    // MARK: - 앱이 포그라운드로 진입할 때
+    // MARK: - 앱 생명주기 메서드들
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        // 앱이 활성화될 때마다 badge 초기화
+        resetBadgeCount()
+        print("앱이 활성화됨 - Badge 초기화")
+    }
+    
     func applicationWillEnterForeground(_ application: UIApplication) {
-        UIApplication.shared.applicationIconBadgeNumber = 0
+        // 앱이 포그라운드로 진입할 때 badge 초기화
+        resetBadgeCount()
+        print("앱이 포그라운드로 진입 - Badge 초기화")
+    }
+    
+    func applicationDidEnterBackground(_ application: UIApplication) {
+        print("앱이 백그라운드로 진입")
+    }
+    
+    func applicationWillResignActive(_ application: UIApplication) {
+        print("앱이 비활성화됨")
     }
     
     // MARK: UISceneSession Lifecycle
@@ -179,7 +213,9 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                                 willPresent notification: UNNotification,
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         
+        print("포그라운드에서 알림 수신")
         // 포그라운드에서도 알림 표시 (배너로 표시)
+        // badge는 표시하지 않음 (포그라운드에서는 badge 증가하지 않아야 함)
         completionHandler([.banner, .sound])
     }
     
@@ -188,10 +224,9 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                                 didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
         
-        // 알림 탭하면 그냥 앱만 활성화 (특별한 처리 없음)
-        // 앱이 꺼져있으면 → 앱 실행
-        // 앱이 백그라운드에 있으면 → 앱을 포그라운드로
-        // 앱이 이미 실행중이면 → 그대로 유지
+        print("사용자가 알림을 탭함")
+        // 알림 탭하면 앱 활성화 및 badge 초기화
+        // (applicationDidBecomeActive에서 자동으로 처리됨)
         completionHandler()
     }
 }
