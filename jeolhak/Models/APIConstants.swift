@@ -21,3 +21,5 @@ enum APIConstants {
     // POST /stores (가게 정보 입력하기)
     static let postStores = baseURL + "/stores"
 }
+
+// 테스트
