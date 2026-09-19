@@ -152,8 +152,6 @@ jeolhak/
 
 ## 📚 관련 문서
 
-프로젝트를 진행하며 쌓인 기획, 회의록, 트러블슈팅 기록은 모두 **[Wiki](../../wiki)** 에 정리되어 있습니다.
-
 | 문서 | 내용 |
 | --- | --- |
 | [🧭 프로젝트 설명서](../../wiki/프로젝트-설명서) | 문제 정의, 목표, 기술 스택, 협업 방식 |
@@ -165,66 +163,3 @@ jeolhak/
 | [✅ APNs 설정 가이드](../../wiki/APNs-설정-가이드) | 실제 키 값 없이 정리한 APNs 발급·연동 방법 |
 
 ---
-
-## 👥 팀원 소개
-
-<table align="center">
-  <tr>
-    <td align="center">
-      <img src="https://avatars.githubusercontent.com/u/62231651?v=4" width="150" height="150"/>
-    </td>
-    <td align="center">
-      <img src="https://avatars.githubusercontent.com/u/89891115?v=4" width="150" height="150"/>
-    </td>
-    <td align="center">
-      <img src="https://avatars.githubusercontent.com/u/82390197?v=4" width="150" height="150"/>
-    </td>
-    <td align="center">
-      <img src="https://avatars.githubusercontent.com/u/103913165?v=4" width="150" height="150"/>
-    </td>
-  </tr>
-
-  <tr>
-    <td align="center">
-      Daehyeon Yun<br/>
-      <a href="https://github.com/YunDaeHyeon">@YunDaeHyeon</a>
-    </td>
-    <td align="center">
-      YoungJae01<br/>
-      <a href="https://github.com/YoungJae01">@YoungJae01</a>
-    </td>
-    <td align="center">
-      봉가은<br/>
-      <a href="https://github.com/pongaun">@pongaun</a>
-    </td>
-    <td align="center">
-      김혜진<br/>
-      <a href="https://github.com/hyejin27">@hyejin27</a>
-    </td>
-  </tr>
-
-  <tr>
-    <td align="center">
-      <b>팀장 / PM</b><br/>
-      <b>iOS 개발</b><br/>
-      <b>서버(API)</b><br/>
-      <b>CI/CD</b>
-    </td>
-    <td align="center">
-      <b>팀원</b><br/>
-      <b>Android 개발</b><br/>
-      <b>UI/UX</b>
-    </td>
-    <td align="center">
-      <b>팀원</b><br/>
-      <b>백엔드</b><br/>
-      <b>API 구축</b>
-    </td>
-    <td align="center">
-      <b>팀원</b><br/>
-      <b>백엔드</b><br/>
-      <b>API 구축</b><br/>
-      <b>데이터베이스</b>
-    </td>
-  </tr>
-</table>
