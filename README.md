@@ -155,11 +155,63 @@ jeolhak/
 
 ## 👥 팀원 소개
 
-**소속 : 컴퓨터소프트웨어공학과 · 팀명 : 거지생존단(절약학개론)**
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src="https://avatars.githubusercontent.com/u/62231651?v=4" width="150" height="150"/>
+    </td>
+    <td align="center">
+      <img src="https://avatars.githubusercontent.com/u/89891115?v=4" width="150" height="150"/>
+    </td>
+    <td align="center">
+      <img src="https://avatars.githubusercontent.com/u/82390197?v=4" width="150" height="150"/>
+    </td>
+    <td align="center">
+      <img src="https://avatars.githubusercontent.com/u/103913165?v=4" width="150" height="150"/>
+    </td>
+  </tr>
 
-| 역할 | 담당자 | 파트 |
-| --- | --- | --- |
-| 팀장 / PM | 윤대현 | iOS 개발, 서버(API), CI/CD |
-| 팀원 | 신용재 | Android 개발, UI/UX |
-| 팀원 | 김혜진 | 백엔드 (API 구축, 데이터베이스) |
-| 팀원 | 봉가은 | 백엔드 (API 구축) |
+  <tr>
+    <td align="center">
+      Daehyeon Yun<br/>
+      <a href="https://github.com/YunDaeHyeon">@YunDaeHyeon</a>
+    </td>
+    <td align="center">
+      YoungJae01<br/>
+      <a href="https://github.com/YoungJae01">@YoungJae01</a>
+    </td>
+    <td align="center">
+      봉가은<br/>
+      <a href="https://github.com/pongaun">@pongaun</a>
+    </td>
+    <td align="center">
+      김혜진<br/>
+      <a href="https://github.com/hyejin27">@hyejin27</a>
+    </td>
+  </tr>
+
+  <tr>
+    <td align="center">
+      <b>팀장 / PM</b><br/>
+      <b>iOS 개발</b><br/>
+      <b>서버(API)</b><br/>
+      <b>CI/CD</b>
+    </td>
+    <td align="center">
+      <b>팀원</b><br/>
+      <b>Android 개발</b><br/>
+      <b>UI/UX</b>
+    </td>
+    <td align="center">
+      <b>팀원</b><br/>
+      <b>백엔드</b><br/>
+      <b>API 구축</b>
+    </td>
+    <td align="center">
+      <b>팀원</b><br/>
+      <b>백엔드</b><br/>
+      <b>API 구축</b><br/>
+      <b>데이터베이스</b>
+    </td>
+  </tr>
+</table>
