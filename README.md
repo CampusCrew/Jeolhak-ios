@@ -24,15 +24,28 @@
 
 ## 📱 스크린샷
 
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/7df8d1a0-b822-4e3a-98f7-0f5fad8f0295" width="900" alt="절약학개론 앱 스크린샷"/>
-</div>
+<table align="center">
+  <tr>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/9446dfa4-3ca2-49ff-9366-ae5e568f7d6f" alt="지도 탐색"/></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/db81eca8-71d6-4cae-b353-cba2a134fe6f" alt="매장 카드"/></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/c9652028-b71d-471c-adb2-6c51c797eb12" alt="매장 목록"/></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/2d9cd58f-0fe2-4a7a-a552-ceb89576803d" alt="할인 상세"/></td>
+    <td align="center" width="20%"><img src="https://github.com/user-attachments/assets/fa130925-5b81-4f2f-823b-d8da32a83588" alt="매장 등록"/></td>
+  </tr>
+  <tr>
+    <td align="center"><b>① 지도 탐색</b><br/><sub>마커로 할인 매장 확인<br/>단과대·학과 필터</sub></td>
+    <td align="center"><b>② 매장 카드</b><br/><sub>마커 선택 시<br/>바텀 카드로 요약</sub></td>
+    <td align="center"><b>③ 매장 목록</b><br/><sub>카드를 위로 올려<br/>주변 매장 스크롤</sub></td>
+    <td align="center"><b>④ 할인 상세</b><br/><sub>할인 내용·기간·대상<br/>네이버 지도 연동</sub></td>
+    <td align="center"><b>⑤ 매장 등록</b><br/><sub>지도에서 위치 선택<br/>주소 자동 반영</sub></td>
+  </tr>
+</table>
 
 <p align="center">
   <sub>왼쪽부터 — 홈(지도 기반 할인 매장 탐색) · 할인 상세 정보 · 매장 등록(주소 확인)</sub>
 </p>
 
-실제 원광대학교 인근 상권(창의공과대학·컴퓨터소프트웨어공학과 제휴 매장 등)을 대상으로 iPhone/Android 실기기 테스트를 거쳤습니다.
+<p align="center">실제 원광대학교 인근 상권(창의공과대학·컴퓨터소프트웨어공학과 제휴 매장 등)을 대상으로 iPhone/Android 실기기 테스트를 거쳤습니다.</p>
 
 ---
 
