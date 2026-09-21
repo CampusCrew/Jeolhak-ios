@@ -43,6 +43,10 @@
 
 <p align="center">실제 원광대학교 인근 상권(창의공과대학·컴퓨터소프트웨어공학과 제휴 매장 등)을 대상으로 iPhone/Android 실기기 테스트를 거쳤습니다.</p>
 
+<p align="center">
+  <a href="https://drive.google.com/drive/folders/1FFyjuyi4RfuE5bqI1uN_Gfv-uP1HG-TX?usp=sharing">📽️ 시연 영상 보기</a>
+</p>
+
 ---
 
 ## ✨ 주요 기능
